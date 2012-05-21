@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2011-2012 by Knut Eirik Leira Hjelle <knuteirik@leirahjelle.net>
  *
- * Based on bootbox by Nick Payne nick@kurai.co.uk (https://github.com/makeusabrew/bootbox)
+ * Based on bootbox by Nick Payne nick@kurai.co.uk (https://github.com/makeusabrew/simplebox)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
@@ -26,7 +26,7 @@ var simplebox = window.simplebox || (function ()
         {
             _icons = {};
         }
-    }
+    };
 
     that.modal = function (/*str, label, options*/)
     {
@@ -85,7 +85,6 @@ var simplebox = window.simplebox || (function ()
             callbacks = [],
             options = options || {};
 
-        // check for single object and convert to array if necessary
         if (handlers == null)
         {
             handlers = [];
@@ -106,8 +105,6 @@ var simplebox = window.simplebox || (function ()
                 typeof handlers[i]['class'] == 'undefined' &&
                 typeof handlers[i]['callback'] == 'undefined')
             {
-                // if we've got nothing we expect, check for condensed format
-
                 var propCount = 0, // condensed will only match if this == 1
                     property = null;   // save the last property we found
 
@@ -117,14 +114,12 @@ var simplebox = window.simplebox || (function ()
                     property = j;
                     if (++propCount > 1)
                     {
-                        // forget it, too many properties
                         break;
                     }
                 }
 
                 if (propCount == 1 && typeof handlers[i][j] == 'function')
                 {
-                    // matches condensed format of label -> function
                     handlers[i]['label'] = property;
                     handlers[i]['callback'] = handlers[i][j];
                 }
@@ -140,7 +135,6 @@ var simplebox = window.simplebox || (function ()
                 _class = handlers[i]['class'];
             } else if (i == handlers.length - 1 && handlers.length <= 2)
             {
-                // always add a primary to the main option in a two-button dialog
                 _class = 'btn-primary';
             }
 
@@ -162,7 +156,7 @@ var simplebox = window.simplebox || (function ()
             callbacks[i] = callback;
         }
 
-        var parts = ["<div class='bootbox modal'>"],
+        var parts = ["<div class='simplebox modal'>"],
             shouldHaveCloseButton = typeof options['closeButton'] === 'undefined' || options['closeButton'] !== false,
             closeButton = "";
         if (options['header'])
@@ -200,7 +194,6 @@ var simplebox = window.simplebox || (function ()
             parts.push(closeButton);
         }
 
-        // push an empty body into which we'll inject the proper content later
         parts.push("<div class='modal-body'></div>");
 
         if (buttons)
@@ -212,7 +205,6 @@ var simplebox = window.simplebox || (function ()
 
         var div = $(parts.join("\n"));
 
-        // check whether we should fade in/out
         var shouldFade = (typeof options.animate === 'undefined') ? _animate : options.animate;
 
         if (shouldFade)
@@ -220,7 +212,6 @@ var simplebox = window.simplebox || (function ()
             div.addClass("fade");
         }
 
-        // now we've built up the div properly we can inject the content whether it was a string or a jQuery object
         $(".modal-body", div).html(str);
 
         div.bind('hidden', function ()
@@ -237,7 +228,6 @@ var simplebox = window.simplebox || (function ()
             }
         });
 
-        // hook into the modal's keyup trigger to check for the escape key
         $(document).bind('keyup.modal', function (e)
         {
             if (e.which == 27)
@@ -246,13 +236,11 @@ var simplebox = window.simplebox || (function ()
             }
         });
 
-        // well, *if* we have a primary - give the last dom element (first displayed) focus
         div.bind('shown', function ()
         {
             $("a.btn-primary:last", div).focus();
         });
 
-        // wire up button handlers
         $('.modal-footer a, a.close', div).click(function (e)
         {
             e.preventDefault();
@@ -291,7 +279,7 @@ var simplebox = window.simplebox || (function ()
 
     that.hideAll = function ()
     {
-        $(".bootbox").modal("hide");
+        $(".simplebox").modal("hide");
     };
 
     that.animate = function (animate)
