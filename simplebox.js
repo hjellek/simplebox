@@ -12,79 +12,21 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
  */
 
-var simplebox = window.simplebox || (function ()
+var exports = this;
+(function ()
 {
-
     var _animate = true,
         _icons = {},
+        dialogOptions = {
+            cssClass:"",
+            backdrop:'static'
+        },
+        callbacks = [],
+        handlers = [],
         that = {};
 
-    that.setIcons = function (icons)
+    function createButtons(handlers)
     {
-        _icons = icons;
-        if (typeof _icons !== 'object' || _icons == null)
-        {
-            _icons = {};
-        }
-    };
-
-    that.modal = function (/*str, label, options*/)
-    {
-        var str;
-        var label;
-        var options;
-
-        var defaultOptions = {
-            "onEscape":null,
-            "keyboard":true,
-            "backdrop":true
-        };
-
-        switch (arguments.length)
-        {
-            case 1:
-                str = arguments[0];
-                break;
-            case 2:
-                str = arguments[0];
-                if (typeof arguments[1] == 'object')
-                {
-                    options = arguments[1];
-                } else
-                {
-                    label = arguments[1];
-                }
-                break;
-            case 3:
-                str = arguments[0];
-                label = arguments[1];
-                options = arguments[2];
-                break;
-            default:
-                throw new Error("Incorrect number of arguments: expected 1-3");
-                break;
-        }
-
-        defaultOptions['header'] = label;
-
-        if (typeof options == 'object')
-        {
-            options = $.extend(defaultOptions, options);
-        } else
-        {
-            options = defaultOptions;
-        }
-
-        return that.dialog(str, [], options);
-    };
-
-    that.dialog = function (str, handlers, options)
-    {
-        var hideSource = null,
-            buttons = "",
-            callbacks = [],
-            options = options || {};
-
         if (handlers == null)
         {
             handlers = [];
@@ -93,7 +35,8 @@ var simplebox = window.simplebox || (function ()
             handlers = [handlers];
         }
 
-        var i = handlers.length;
+        var buttons = "",
+            i = handlers.length;
         while (i--)
         {
             var label = null,
@@ -155,10 +98,14 @@ var simplebox = window.simplebox || (function ()
 
             callbacks[i] = callback;
         }
+        return buttons;
+    }
 
-        var parts = ["<div class='simplebox modal'>"],
-            shouldHaveCloseButton = typeof options['closeButton'] === 'undefined' || options['closeButton'] !== false,
-            closeButton = "";
+    function createHeaderAndCloseButton(options)
+    {
+        var shouldHaveCloseButton = typeof options['closeButton'] === 'undefined' || options['closeButton'] !== false,
+            closeButton = "",
+            html = "";
         if (options['header'])
         {
             if (shouldHaveCloseButton)
@@ -179,7 +126,7 @@ var simplebox = window.simplebox || (function ()
                 header = "<h3>" + options['header'] + "</h3>";
             }
 
-            parts.push("<div class='modal-header'>" + closeButton + header + "</div>");
+            html = "<div class='modal-header'>" + closeButton + header + "</div>";
         }
         else if (shouldHaveCloseButton)
         {
@@ -191,21 +138,92 @@ var simplebox = window.simplebox || (function ()
             {
                 closeButton = "<a href='#' class='close'></a>";
             }
-            parts.push(closeButton);
+            html = closeButton;
         }
+        return html;
+    }
+
+    that.setIcons = function (icons)
+    {
+        _icons = icons;
+        if (typeof _icons !== 'object' || _icons == null)
+        {
+            _icons = {};
+        }
+    };
+
+    that.modal = function (/*str, label, options*/)
+    {
+        var str,
+            label,
+            options = {},
+            defaultOptions = {
+                onEscape:null,
+                keyboard:true,
+                backdrop:true
+            };
+
+        switch (arguments.length)
+        {
+            case 1:
+                str = arguments[0];
+                break;
+            case 2:
+                str = arguments[0];
+                if (typeof arguments[1] == 'object')
+                {
+                    options = arguments[1];
+                } else
+                {
+                    label = arguments[1];
+                }
+                break;
+            case 3:
+                str = arguments[0];
+                label = arguments[1];
+                options = arguments[2];
+                break;
+            default:
+                throw new Error("Incorrect number of arguments: expected 1-3");
+                break;
+        }
+
+        options['header'] = label;
+        options = $.extend(defaultOptions, options);
+
+        return that.renderModal(str, [], options);
+    };
+
+    that.renderModal = function (str, buttons, options)
+    {
+        var hideSource = null,
+            buttonHtml = createButtons(buttons),
+            callbacks = [],
+            options = options || {},
+            cssClass,
+            parts,
+            div,
+            shouldFade;
+
+        options = $.extend(dialogOptions, options);
+
+        cssClass = options['cssClass'] || "";
+        shouldFade = (typeof options.animate === 'undefined') ? _animate : options.animate;
+
+        parts = ["<div class='simplebox modal " + cssClass + "'>"];
+
+        parts.push(createHeaderAndCloseButton(options));
 
         parts.push("<div class='modal-body'></div>");
 
-        if (buttons)
+        if (buttonHtml)
         {
-            parts.push("<div class='modal-footer'>" + buttons + "</div>")
+            parts.push("<div class='modal-footer'>" + buttonHtml + "</div>")
         }
 
         parts.push("</div>");
 
-        var div = $(parts.join("\n"));
-
-        var shouldFade = (typeof options.animate === 'undefined') ? _animate : options.animate;
+        div = $(parts.join("\n"));
 
         if (shouldFade)
         {
@@ -230,7 +248,7 @@ var simplebox = window.simplebox || (function ()
 
         $(document).bind('keyup.modal', function (e)
         {
-            if (e.which == 27)
+            if (e.which === 27)
             {
                 hideSource = 'escape';
             }
@@ -248,7 +266,7 @@ var simplebox = window.simplebox || (function ()
             div.modal("hide");
             var handler = $(this).data("handler");
             var cb = callbacks[handler];
-            if (typeof cb == 'function')
+            if (typeof cb === 'function')
             {
                 cb();
             }
@@ -256,7 +274,7 @@ var simplebox = window.simplebox || (function ()
 
         if (options.keyboard == null)
         {
-            options.keyboard = (typeof options.onEscape == 'function');
+            options.keyboard = (typeof options.onEscape === 'function');
         }
 
         $("body").append(div);
@@ -265,7 +283,6 @@ var simplebox = window.simplebox || (function ()
             "backdrop":options.backdrop || true,
             "keyboard":options.keyboard
         });
-
         return div;
     };
 
@@ -287,5 +304,5 @@ var simplebox = window.simplebox || (function ()
         _animate = animate;
     };
 
-    return that;
-})();
+    exports.simplebox = that;
+}());
