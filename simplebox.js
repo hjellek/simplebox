@@ -13,8 +13,10 @@
  */
 
 var exports = this;
-(function ()
+(function (window)
 {
+    "use strict";
+
     var _animate = true,
         _icons = {},
         dialogOptions = {
@@ -143,6 +145,159 @@ var exports = this;
         return html;
     }
 
+    function fitToContent(options)
+    {
+        var contentHeight = this.find('.modal-body :first').outerHeight();
+        calculateHeightAndResize(this, contentHeight, options);
+    }
+
+    function autoFit(options)
+    {
+        var timer,
+            modal = this,
+            options = options || {},
+            delay = options.delay || 100;
+        $(window).bind('resize', function ()
+        {
+            clearTimeout(timer);
+            timer = setTimeout(function ()
+            {
+                modal.fitToContent(options);
+            }, delay);
+        });
+    }
+
+    function replaceAndFitToContent(content)
+    {
+        var contentHeight = calculateContentHeight.apply(this, content);
+        calculateHeightAndResize(this, contentHeight);
+        this.find('.modal-body').html(content);
+    }
+
+    function calculateHeightAndResize($modal, contentHeight, options)
+    {
+        var $header = $modal.find('.modal-header'),
+            $footer = $modal.find('.modal-footer'),
+            height,
+            viewHeight = $(window).innerHeight(),
+            headerAndFooterOffset = 30, // padding in body
+            options = options||{},
+            minHeight = options.minHeight||parseInt($modal.css('min-height'), 10),
+            maxHeight = options.maxHeight||parseInt($modal.css('max-height'), 10);
+
+        debug('calculateHeightAndResize', minHeight, contentHeight, maxHeight);
+
+        if ($header)
+        {
+            headerAndFooterOffset += $header.outerHeight();
+        }
+
+        if ($footer)
+        {
+            headerAndFooterOffset += $footer.outerHeight();
+        }
+
+        height = contentHeight + headerAndFooterOffset;
+
+        if (!isNaN(minHeight) && height < minHeight)
+        {
+            height = minHeight;
+        }
+        if (height > viewHeight)
+        {
+            height = viewHeight - 30;
+            contentHeight = height - headerAndFooterOffset;
+        }
+        if (!isNaN(maxHeight) && height > maxHeight)
+        {
+            height = maxHeight;
+            contentHeight = maxHeight - headerAndFooterOffset;
+        }
+
+        console.log(height, contentHeight);
+        resizeModalTo($modal, undefined, height, contentHeight);
+    }
+
+    function resizeModalTo($modal, width, height, bodyHeight)
+    {
+        var $body = $modal.find('.modal-body'),
+            bodyCss = {
+                'height':bodyHeight
+            },
+            modalCss = {
+                'margin-top':-(height / 2),
+                'height':    height
+            };
+        if (width)
+        {
+            bodyCss.width = width;
+            modalCss.width = width;
+        }
+        $body.css(bodyCss);
+        $modal.css(modalCss);
+    }
+
+    function calculateContentHeight(content)
+    {
+        var contentContainer = $('<div id="simplebox-content" class="simplebox modal"><div class="modal-body"></div></div>'),
+            modalBody,
+            height,
+            content = content.replace(/<script[\s\S]*<\/script>/gi, ''),
+            width = 800;
+        contentContainer.css({width:width, position:'absolute', left:-3000});
+        $('body').append(contentContainer);
+        modalBody = $('#simplebox-content').find('.modal-body');
+        modalBody.append(content);
+        height = modalBody.find(':first').outerHeight();
+        contentContainer.remove();
+        return height;
+    }
+
+    function addFunctions(modal)
+    {
+        modal.fitToContent = fitToContent;
+        modal.autoFit = autoFit;
+        modal.replaceAndFitToContent = replaceAndFitToContent;
+        return modal;
+    }
+
+    function backDropExists()
+    {
+        var b = $('.modal-backdrop');
+        console.log(b, 'isempty', b.length === 0);
+        return $('.modal-backdrop').length !== 0;
+    }
+
+    function moveBackdropToModal(div)
+    {
+        var z = div.css('z-index') - 5;
+        console.log('Preparing backdrop z-index shift to ', z);
+        $('.modal-backdrop').css('z-index', z);
+    }
+
+    function moveBackdropToPreviousModalOrRemove()
+    {
+        var modals = $('.modal');
+        if (modals.length <= 0)
+        {
+            if (_animate)
+            {
+                $('.modal-backdrop').fadeOut(300, function ()
+                {
+                    $('.modal-backdrop').remove();
+                });
+            }
+            else
+            {
+                $('.modal-backdrop').remove();
+            }
+        }
+        else
+        {
+            moveBackdropToModal(modals.last());
+        }
+    }
+
     that.setIcons = function (icons)
     {
         _icons = icons;
@@ -198,11 +353,10 @@ var exports = this;
     {
         var hideSource = null,
             buttonHtml = createButtons(buttons),
-            callbacks = [],
             options = options || {},
             cssClass,
             parts,
-            div,
+            modal,
             shouldFade;
 
         options = $.extend(dialogOptions, options);
@@ -223,21 +377,21 @@ var exports = this;
 
         parts.push("</div>");
 
-        div = $(parts.join("\n"));
+        modal = $(parts.join("\n"));
 
         if (shouldFade)
         {
-            div.addClass("fade");
+            modal.addClass("fade");
         }
 
-        $(".modal-body", div).html(str);
+        $(".modal-body", modal).html(str);
 
-        div.bind('hidden', function ()
+        modal.bind('hidden', function ()
         {
-            div.remove();
+            modal.remove();
         });
 
-        div.bind('hide', function ()
+        modal.bind('hide', function ()
         {
             if (hideSource == 'escape' &&
                 typeof options.onEscape == 'function')
@@ -254,16 +408,16 @@ var exports = this;
             }
         });
 
-        div.bind('shown', function ()
+        modal.bind('shown', function ()
         {
-            $("a.btn-primary:last", div).focus();
+            $("a.btn-primary:last", modal).focus();
         });
 
-        $('.modal-footer a, a.close', div).click(function (e)
+        $('.modal-footer a, a.close', modal).click(function (e)
         {
             e.preventDefault();
             hideSource = 'button';
-            div.modal("hide");
+            modal.modal("hide");
             var handler = $(this).data("handler");
             var cb = callbacks[handler];
             if (typeof cb === 'function')
@@ -277,13 +431,31 @@ var exports = this;
             options.keyboard = (typeof options.onEscape === 'function');
         }
 
-        $("body").append(div);
+        $("body").append(modal);
 
-        div.modal({
-            "backdrop":options.backdrop || true,
+        var backdropAlreadyExists = backDropExists(),
+            backdrop = (options.backdrop === 'static' || options.backdrop) && !backdropAlreadyExists ? options.backdrop : false;
+
+        modal.modal({
+            "backdrop":backdrop,
             "keyboard":options.keyboard
         });
-        return div;
+
+        if (backdropAlreadyExists)
+        {
+            moveBackdropToModal(modal);
+        }
+
+        modal.close = function ()
+        {
+            this.bind('hidden', function ()
+            {
+                moveBackdropToPreviousModalOrRemove();
+            });
+            this.modal('hide');
+        };
+        modal = addFunctions(modal);
+        return modal;
     };
 
     that.loadContent = function (url, callback)
@@ -305,4 +477,4 @@ var exports = this;
     };
 
     exports.simplebox = that;
-}());
+}(window));
