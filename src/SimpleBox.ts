@@ -4,167 +4,39 @@
  * Time: 4:02 PM
  */
 ///<reference path='definitions/jquery.d.ts' />
-export class SimpleBox {
-    _animate = true;
-    _icons = {};
-    dialogOptions = {
+/**
+ * The MIT License
+ *
+ * Copyright (C) 2011-2012 by Knut Eirik Leira Hjelle <knuteirik@leirahjelle.net>
+ *
+ * Based on bootbox by Nick Payne nick@kurai.co.uk (https://github.com/makeusabrew/simplebox)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+ */
+
+class SimpleBox {
+    public RESIZE = 'simplebox.resize';
+
+    private _animate = true;
+    private _icons = {};
+    private modalOptions = {
         cssClass: "",
-        backdrop: 'static'
+        backdrop: 'static',
+        hidden: false,
+        resize: false
     };
-    callbacks = [];
-    handlers = [];
-    that = {};
-
-    constructor() {
-
-    }
-
-    public modal(/*str, label, options*/) {
-        var str,
-            label,
-            options = {},
-            defaultOptions = {
-                onEscape: null,
-                keyboard: true,
-                backdrop: true
-            };
-
-        switch (arguments.length) {
-            case 1:
-                str = arguments[0];
-                break;
-            case 2:
-                str = arguments[0];
-                if (typeof arguments[1] == 'object') {
-                    options = arguments[1];
-                } else {
-                    label = arguments[1];
-                }
-                break;
-            case 3:
-                str = arguments[0];
-                label = arguments[1];
-                options = arguments[2];
-                break;
-            default:
-                throw new Error("Incorrect number of arguments: expected 1-3");
-                break;
-        }
-
-        options['header'] = label;
-        options = $.extend(defaultOptions, options);
-
-        return this.renderModal(str, [], options);
-    }
-
-    public renderModal(str, buttons, options) {
-        var hideSource = null,
-            buttonHtml = this.createButtons(buttons),
-            options = options || {},
-            cssClass,
-            parts,
-            modal,
-            shouldFade;
-
-        options = $.extend(this.dialogOptions, options);
-
-        cssClass = options['cssClass'] || "";
-        shouldFade = (typeof options.animate === 'undefined') ? this._animate : options.animate;
-
-        parts = ["<div class='simplebox modal " + cssClass + "'>"];
-
-        parts.push(this.createHeaderAndCloseButton(options));
-
-        parts.push("<div class='modal-body'></div>");
-
-        if (buttonHtml) {
-            parts.push("<div class='modal-footer'>" + buttonHtml + "</div>")
-        }
-
-        parts.push("</div>");
-
-        modal = $(parts.join("\n"));
-
-        if (shouldFade) {
-            modal.addClass("fade");
-        }
-
-        $(".modal-body", modal).html(str);
-
-        modal.bind('hidden', function () {
-            modal.remove();
-        });
-
-        modal.bind('hide', function () {
-            if (hideSource == 'escape' &&
-                typeof options.onEscape == 'function') {
-                options.onEscape();
-            }
-        });
-
-        $(document).bind('keyup.modal', function (e) {
-            if (e.which === 27) {
-                hideSource = 'escape';
-            }
-        });
-
-        modal.bind('shown', function () {
-            $("a.btn-primary:last", modal).focus();
-        });
-
-        $('.modal-footer a, a.close', modal).click(function (e) {
-            e.preventDefault();
-            hideSource = 'button';
-            modal.modal("hide");
-            var handler = $(this).data("handler");
-            var cb = this.callbacks[handler];
-            if (typeof cb === 'function') {
-                cb();
-            }
-        });
-
-        if (options.keyboard == null) {
-            options.keyboard = (typeof options.onEscape === 'function');
-        }
-
-        $("body").append(modal);
-
-        var backdropAlreadyExists = this.backDropExists(),
-            backdrop = (options.backdrop === 'static' || options.backdrop) && !backdropAlreadyExists ? options.backdrop : false;
-
-        modal.modal({
-            "backdrop": backdrop,
-            "keyboard": options.keyboard
-        });
-
-        if (backdropAlreadyExists) {
-            this.moveBackdropToModal(modal);
-        }
-
-        modal.close = function () {
-            var self:SimpleBox = this;
-            this.bind('hidden', function () {
-                self.moveBackdropToPreviousModalOrRemove();
-            });
-            this.modal('hide');
-        };
-        modal = this.addFunctions(modal);
-        return modal;
-    }
-
-    public hideAll() {
-        $(".simplebox").modal("hide");
-    }
-
-    public animate(bool) {
-        this._animate = bool;
-    }
-
+    private callbacks = [];
+    private handlers = [];
 
     private createButtons(handlers) {
         if (handlers == null) {
             handlers = [];
-        } else if (typeof handlers.length == 'undefined') {
+        }
+        else if (typeof handlers.length == 'undefined') {
             handlers = [handlers];
         }
 
@@ -202,13 +74,15 @@ export class SimpleBox {
 
             if (handlers[i]['class']) {
                 _class = handlers[i]['class'];
-            } else if (i == handlers.length - 1 && handlers.length <= 2) {
+            }
+            else if (i == handlers.length - 1 && handlers.length <= 2) {
                 _class = 'btn-primary';
             }
 
             if (handlers[i]['label']) {
                 label = handlers[i]['label'];
-            } else {
+            }
+            else {
                 label = "Option " + (i + 1);
             }
 
@@ -256,63 +130,86 @@ export class SimpleBox {
         return html;
     }
 
-    private fitToContent(options) {
-        var contentHeight = this.find('.modal-body :first').outerHeight();
-        this.calculateHeightAndResize(contentHeight, options);
-    }
+    private getModalAreaSizes() {
+        var tmpModal = $('<div></div>');
+        var content = this.html();
+        var header = 0,
+            footer = 0,
+            body = 0;
+        content = content.replace(/(<script[\s\S]*?<\/script>)+/gi, '');
 
-    private autoFit(options) {
-        var timer,
-            modal = this,
-            options = options || {},
-            delay = options.delay || 100;
-        $(window).bind('resize', function () {
-            clearTimeout(timer);
-            timer = setTimeout(function () {
-                modal.fitToContent(options);
-            }, delay);
+        tmpModal.addClass(this.attr('class'));
+        tmpModal.html(content);
+        tmpModal.css({
+            position: 'absolute',
+            left: -3000
         });
-    }
-
-    replaceAndFitToContent(content) {
-        var contentHeight = calculateContentHeight.apply(this, content);
-        calculateHeightAndResize(this, contentHeight);
-        this.find('.modal-body').html(content);
-    }
-
-    private calculateHeightAndResize($modal, contentHeight, options) {
-        var $header = $modal.find('.modal-header'),
-            $footer = $modal.find('.modal-footer'),
-            height,
-            viewHeight = $(window).innerHeight(),
-            headerAndFooterOffset = 30, // padding in body
-            options = options || {},
-            minHeight = options.minHeight || parseInt($modal.css('min-height'), 10),
-            maxHeight = options.maxHeight || parseInt($modal.css('max-height'), 10);
-
+        $('body').append(tmpModal);
+        tmpModal.removeClass('hidden').show();
+        body = tmpModal.find('.modal-body div:first').outerHeight();
+        var $header = tmpModal.find('.modal-header'),
+            $footer = tmpModal.find('.modal-footer');
         if ($header) {
-            headerAndFooterOffset += $header.outerHeight();
+            header = $header.outerHeight();
         }
-
         if ($footer) {
-            headerAndFooterOffset += $footer.outerHeight();
+            footer = $footer.outerHeight();
+        }
+        tmpModal.remove();
+        return {header: header, body: body, footer: footer};
+    }
+
+    private resize(options) {
+        if (!options || typeof options !== 'object' || Object.keys(options).length === 0) {
+            return;
         }
 
-        height = contentHeight + headerAndFooterOffset;
+        var $body = this.find('.modal-body'),
+            height = 0,
+            viewHeight = $(window).innerHeight(),
+            max = false,
+            min = false,
+            content = false,
+            modalAreaSizes = this.getModalAreaSizes(),
+            headerAndFooterOffset = modalAreaSizes.header + modalAreaSizes.footer;
 
-        if (!isNaN(minHeight) && height < minHeight) {
-            height = minHeight;
+        var padding = parseInt($body.css('padding-top'), 10) + parseInt($body.css('padding-bottom'), 10);
+        if (options.content && options.content !== false) {
+            content = options.content === true ? modalAreaSizes.body + 10 : options.content;
+            height = content;
         }
-        if (height > viewHeight) {
+
+        if (options.max && options.max !== false) {
+            max = options.max === true ? parseInt(this.css('max-height'), 10) : options.max;
+            if (max && (!content || content > max)) {
+                height = max;
+            }
+        }
+        else if (!content) {
             height = viewHeight - 30;
-            contentHeight = height - headerAndFooterOffset;
-        }
-        if (!isNaN(maxHeight) && height > maxHeight) {
-            height = maxHeight;
-            contentHeight = maxHeight - headerAndFooterOffset;
         }
 
-        this.resizeModalTo($modal, undefined, height, contentHeight);
+        if (height > viewHeight) {
+            height = viewHeight - 30; // a bit offset
+        }
+
+        if (options.min && options.min !== false) {
+            min = options.min === true ? parseInt(this.css('min-height'), 10) : options.min;
+            if (height < min && min > viewHeight) {
+                height = min - 30;
+            }
+            else if (height < min) {
+                height = min;
+            }
+        }
+
+        if (content && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || content <= max))) {
+            this.resizeModalTo(this, undefined, height + (headerAndFooterOffset + padding), height);
+        }
+        else {
+            this.resizeModalTo(this, undefined, height, height - (headerAndFooterOffset + padding));
+        }
+
     }
 
     private resizeModalTo($modal, width, height, bodyHeight) {
@@ -328,42 +225,30 @@ export class SimpleBox {
             bodyCss.width = width;
             modalCss.width = width;
         }
-        $body.css(bodyCss);
-        $modal.css(modalCss);
-    }
 
-    private calculateContentHeight(content) {
-        var contentContainer = $('<div id="simplebox-content" class="simplebox modal"><div class="modal-body"></div></div>'),
-            modalBody,
-            height,
-            content = content.replace(/<script[\s\S]*<\/script>/gi, ''),
-            width = 800;
-        contentContainer.css({width: width, position: 'absolute', left: -3000});
-        $('body').append(contentContainer);
-        modalBody = $('#simplebox-content').find('.modal-body');
-        modalBody.append(content);
-        height = modalBody.find(':first').outerHeight();
-        contentContainer.remove();
-        return height;
-    }
+        if (this._animate) {
+            $body.animate(bodyCss, 250);
+            $modal.animate(modalCss, 250, function () {
+                $modal.trigger(this.RESIZE);
+            });
+        }
+        else {
+            $body.css(bodyCss);
+            $modal.css(modalCss);
+            $modal.trigger(this.RESIZE);
 
-    private addFunctions(modal) {
-        modal.fitToContent = fitToContent;
-        modal.autoFit = autoFit;
-        modal.replaceAndFitToContent = replaceAndFitToContent;
-        return modal;
+        }
     }
 
     private backDropExists() {
         var b = $('.modal-backdrop');
-        console.log(b, 'isempty', b.length === 0);
         return $('.modal-backdrop').length !== 0;
     }
 
     private moveBackdropToModal(div) {
         var z = div.css('z-index') - 5;
-        console.log('Preparing backdrop z-index shift to ', z);
         $('.modal-backdrop').css('z-index', z);
+        $('body').addClass('modal-open');
     }
 
     private moveBackdropToPreviousModalOrRemove() {
@@ -372,10 +257,12 @@ export class SimpleBox {
             if (this._animate) {
                 $('.modal-backdrop').fadeOut(300, function () {
                     $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                 });
             }
             else {
                 $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
             }
         }
         else {
@@ -390,10 +277,184 @@ export class SimpleBox {
         }
     }
 
-    private loadContent(url, callback) {
-        $.ajax({
-            url: url,
-            success: callback
+    public modal(/*str, label, options*/) {
+        var str,
+            label,
+            options = {},
+            defaultOptions = {
+                onEscape: null,
+                keyboard: true,
+                backdrop: true
+            };
+
+        switch (arguments.length) {
+            case 1:
+                str = arguments[0];
+                break;
+            case 2:
+                str = arguments[0];
+                if (typeof arguments[1] == 'object') {
+                    options = arguments[1];
+                }
+                else {
+                    label = arguments[1];
+                }
+                break;
+            case 3:
+                str = arguments[0];
+                label = arguments[1];
+                options = arguments[2];
+                break;
+            default:
+                throw new Error("Incorrect number of arguments: expected 1-3");
+                break;
+        }
+
+        options['header'] = label;
+        options = $.extend(defaultOptions, options);
+
+        return this.renderModal(str, [], options);
+    }
+
+    public renderModal(str, buttons, options) {
+        var self:SimpleBox = this,
+            hideSource = null,
+            buttonHtml = this.createButtons(buttons),
+            options = options || {},
+            cssClass,
+            parts,
+            modal,
+            shouldFade;
+
+        options = $.extend({}, this.modalOptions, options);
+
+        cssClass = options['cssClass'] || "";
+        shouldFade = (typeof options.animate === 'undefined') ? this._animate : options.animate;
+
+        parts = ["<div class='simplebox modal " + cssClass + "'>"];
+
+        parts.push(this.createHeaderAndCloseButton(options));
+
+        parts.push("<div class='modal-body'></div>");
+
+        if (buttonHtml) {
+            parts.push("<div class='modal-footer'>" + buttonHtml + "</div>")
+        }
+
+        parts.push("</div>");
+
+        modal = $(parts.join("\n"));
+
+        if (shouldFade) {
+            modal.addClass("fade");
+        }
+        if (options.hidden) {
+            modal.addClass('hidden');
+        }
+
+        $(".modal-body", modal).html(str);
+
+        modal.bind('hidden', function () {
+            modal.remove();
         });
+
+        modal.bind('hide', function () {
+            if (hideSource == 'escape' &&
+                typeof options.onEscape == 'function') {
+                options.onEscape();
+            }
+        });
+
+        $(document).bind('keyup.modal', function (e) {
+            if (e.which === 27) {
+                hideSource = 'escape';
+            }
+        });
+
+        modal.bind('shown', function () {
+            $("a.btn-primary:last", modal).focus();
+        });
+
+        $('.modal-footer a, a.close', modal).click(function (e) {
+            e.preventDefault();
+            hideSource = 'button';
+            var handler = $(this).data("handler");
+            var cb = self.callbacks[handler];
+            if (typeof cb === 'function') {
+                var returnValue = cb(modal, e);
+                if (returnValue === true || typeof returnValue === 'undefined') {
+                    modal.close();
+                }
+            }
+            else {
+                modal.close();
+            }
+        });
+
+        if (options.keyboard == null) {
+            options.keyboard = (typeof options.onEscape === 'function');
+        }
+
+        $("body").append(modal);
+
+        var backdropAlreadyExists = this.backDropExists(),
+            backdrop = (options.backdrop === 'static' || options.backdrop) && !backdropAlreadyExists ? options.backdrop : false;
+
+        modal.modal({
+            "backdrop": backdrop,
+            "keyboard": options.keyboard
+        });
+
+        if (backdropAlreadyExists) {
+            this.moveBackdropToModal(modal);
+        }
+
+        modal.close = function () {
+            this.bind('hidden', function () {
+                self.moveBackdropToPreviousModalOrRemove();
+            });
+            this.modal('hide');
+        };
+
+        modal.data('options', options);
+        //modal = addFunctions(modal);
+
+        modal.modalResize = function (options) {
+            var allOptions = this.data('options') || {},
+                params = allOptions.resize || {};
+            options = options || {};
+            $.extend(params, options);
+
+            resize.call(modal, params);
+        };
+
+        modal.modalShow = function (fade) {
+            this.hide();
+            this.removeClass('hidden');
+            if (fade) {
+                var speed = parseInt(fade, 10) || 300;
+                this.fadeIn(speed);
+            }
+            else {
+                this.show();
+            }
+        };
+
+        modal.modalPopulate = function (data, resize) {
+            this.find('.modal-body').html(data);
+            if (resize) {
+                this.modalResize();
+            }
+        };
+
+        return modal;
+    }
+
+    public hideAll() {
+        $(".simplebox").modal("hide");
+    }
+
+    public animate(bool) {
+        this._animate = bool;
     }
 }
