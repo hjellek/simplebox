@@ -19,20 +19,25 @@ var exports = this;
 
     var _animate = true,
         _icons = {},
-        dialogOptions = {
+        modalOptions = {
             cssClass:"",
-            backdrop:'static'
+            backdrop:'static',
+            hidden:  false,
+            resize:  false
         },
         callbacks = [],
         handlers = [],
-        that = {};
+        that = {
+            RESIZE:'simplebox.resize'
+        };
 
     function createButtons(handlers)
     {
         if (handlers == null)
         {
             handlers = [];
-        } else if (typeof handlers.length == 'undefined')
+        }
+        else if (typeof handlers.length == 'undefined')
         {
             handlers = [handlers];
         }
@@ -78,7 +83,8 @@ var exports = this;
             if (handlers[i]['class'])
             {
                 _class = handlers[i]['class'];
-            } else if (i == handlers.length - 1 && handlers.length <= 2)
+            }
+            else if (i == handlers.length - 1 && handlers.length <= 2)
             {
                 _class = 'btn-primary';
             }
@@ -86,7 +92,8 @@ var exports = this;
             if (handlers[i]['label'])
             {
                 label = handlers[i]['label'];
-            } else
+            }
+            else
             {
                 label = "Option " + (i + 1);
             }
@@ -145,77 +152,101 @@ var exports = this;
         return html;
     }
 
-    function fitToContent(options)
+    function getModalAreaSizes()
     {
-        var contentHeight = this.find('.modal-body :first').outerHeight();
-        calculateHeightAndResize(this, contentHeight, options);
-    }
+        var tmpModal = $('<div></div>');
+        var content = this.html();
+        var header = 0,
+            footer = 0,
+            body = 0;
+        content = content.replace(/(<script[\s\S]*?<\/script>)+/gi, '');
 
-    function autoFit(options)
-    {
-        var timer,
-            modal = this,
-            options = options || {},
-            delay = options.delay || 100;
-        $(window).bind('resize', function ()
-        {
-            clearTimeout(timer);
-            timer = setTimeout(function ()
-            {
-                modal.fitToContent(options);
-            }, delay);
+        tmpModal.addClass(this.attr('class'));
+        tmpModal.html(content);
+        tmpModal.css({
+            position:'absolute',
+            left:    -3000
         });
-    }
-
-    function replaceAndFitToContent(content)
-    {
-        var contentHeight = calculateContentHeight.apply(this, content);
-        calculateHeightAndResize(this, contentHeight);
-        this.find('.modal-body').html(content);
-    }
-
-    function calculateHeightAndResize($modal, contentHeight, options)
-    {
-        var $header = $modal.find('.modal-header'),
-            $footer = $modal.find('.modal-footer'),
-            height,
-            viewHeight = $(window).innerHeight(),
-            headerAndFooterOffset = 30, // padding in body
-            options = options||{},
-            minHeight = options.minHeight||parseInt($modal.css('min-height'), 10),
-            maxHeight = options.maxHeight||parseInt($modal.css('max-height'), 10);
-
-        debug('calculateHeightAndResize', minHeight, contentHeight, maxHeight);
-
+        $('body').append(tmpModal);
+        tmpModal.removeClass('hidden').show();
+        body = tmpModal.find('.modal-body div:first').outerHeight();
+        var $header = tmpModal.find('.modal-header'),
+            $footer = tmpModal.find('.modal-footer');
         if ($header)
         {
-            headerAndFooterOffset += $header.outerHeight();
+            header = $header.outerHeight();
         }
-
         if ($footer)
         {
-            headerAndFooterOffset += $footer.outerHeight();
+            footer = $footer.outerHeight();
         }
+        tmpModal.remove();
+        return {header:header, body:body, footer:footer};
+    }
 
-        height = contentHeight + headerAndFooterOffset;
-
-        if (!isNaN(minHeight) && height < minHeight)
+    function resize(options)
+    {
+        if (!options || typeof options !== 'object' || Object.keys(options).length === 0)
         {
-            height = minHeight;
+            return;
         }
-        if (height > viewHeight)
+
+        var $body = this.find('.modal-body'),
+            height = 0,
+            viewHeight = $(window).innerHeight(),
+            max = false,
+            min = false,
+            content = false,
+            modalAreaSizes = getModalAreaSizes.apply(this),
+            headerAndFooterOffset = modalAreaSizes.header + modalAreaSizes.footer;
+
+        var padding = parseInt($body.css('padding-top'), 10) + parseInt($body.css('padding-bottom'), 10);
+        if (options.content && options.content !== false)
+        {
+            content = options.content === true ? modalAreaSizes.body + 10 : options.content;
+            height = content;
+        }
+
+        if (options.max && options.max !== false)
+        {
+            max = options.max === true ? parseInt(this.css('max-height'), 10) : options.max;
+            if (max && (!content || content > max))
+            {
+                height = max;
+            }
+        }
+        else if (!content)
         {
             height = viewHeight - 30;
-            contentHeight = height - headerAndFooterOffset;
-        }
-        if (!isNaN(maxHeight) && height > maxHeight)
-        {
-            height = maxHeight;
-            contentHeight = maxHeight - headerAndFooterOffset;
         }
 
-        console.log(height, contentHeight);
-        resizeModalTo($modal, undefined, height, contentHeight);
+        if (height > viewHeight)
+        {
+            height = viewHeight - 30; // a bit offset
+        }
+
+        if (options.min && options.min !== false)
+        {
+            min = options.min === true ? parseInt(this.css('min-height'), 10) : options.min;
+            if (height < min && min > viewHeight)
+            {
+                height = min - 30;
+            }
+            else if (height < min)
+            {
+                height = min;
+            }
+        }
+
+        if (content && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || content <= max)))
+        {
+            resizeModalTo(this, undefined, height + (headerAndFooterOffset + padding), height);
+        }
+        else
+        {
+            resizeModalTo(this, undefined, height, height - (headerAndFooterOffset + padding));
+        }
+
     }
 
     function resizeModalTo($modal, width, height, bodyHeight)
@@ -233,46 +264,35 @@ var exports = this;
             bodyCss.width = width;
             modalCss.width = width;
         }
-        $body.css(bodyCss);
-        $modal.css(modalCss);
-    }
 
-    function calculateContentHeight(content)
-    {
-        var contentContainer = $('<div id="simplebox-content" class="simplebox modal"><div class="modal-body"></div></div>'),
-            modalBody,
-            height,
-            content = content.replace(/<script[\s\S]*<\/script>/gi, ''),
-            width = 800;
-        contentContainer.css({width:width, position:'absolute', left:-3000});
-        $('body').append(contentContainer);
-        modalBody = $('#simplebox-content').find('.modal-body');
-        modalBody.append(content);
-        height = modalBody.find(':first').outerHeight();
-        contentContainer.remove();
-        return height;
-    }
+        if (_animate)
+        {
+            $body.animate(bodyCss, 250);
+            $modal.animate(modalCss, 250, function ()
+            {
+                $modal.trigger(that.RESIZE);
+            });
+        }
+        else
+        {
+            $body.css(bodyCss);
+            $modal.css(modalCss);
+            $modal.trigger(that.RESIZE);
 
-    function addFunctions(modal)
-    {
-        modal.fitToContent = fitToContent;
-        modal.autoFit = autoFit;
-        modal.replaceAndFitToContent = replaceAndFitToContent;
-        return modal;
+        }
     }
 
     function backDropExists()
     {
         var b = $('.modal-backdrop');
-        console.log(b, 'isempty', b.length === 0);
         return $('.modal-backdrop').length !== 0;
     }
 
     function moveBackdropToModal(div)
     {
         var z = div.css('z-index') - 5;
-        console.log('Preparing backdrop z-index shift to ', z);
         $('.modal-backdrop').css('z-index', z);
+        $('body').addClass('modal-open');
     }
 
     function moveBackdropToPreviousModalOrRemove()
@@ -285,11 +305,13 @@ var exports = this;
                 $('.modal-backdrop').fadeOut(300, function ()
                 {
                     $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                 });
             }
             else
             {
                 $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
             }
         }
         else
@@ -328,7 +350,8 @@ var exports = this;
                 if (typeof arguments[1] == 'object')
                 {
                     options = arguments[1];
-                } else
+                }
+                else
                 {
                     label = arguments[1];
                 }
@@ -359,7 +382,7 @@ var exports = this;
             modal,
             shouldFade;
 
-        options = $.extend(dialogOptions, options);
+        options = $.extend({}, modalOptions, options);
 
         cssClass = options['cssClass'] || "";
         shouldFade = (typeof options.animate === 'undefined') ? _animate : options.animate;
@@ -382,6 +405,10 @@ var exports = this;
         if (shouldFade)
         {
             modal.addClass("fade");
+        }
+        if (options.hidden)
+        {
+            modal.addClass('hidden');
         }
 
         $(".modal-body", modal).html(str);
@@ -417,12 +444,19 @@ var exports = this;
         {
             e.preventDefault();
             hideSource = 'button';
-            modal.modal("hide");
             var handler = $(this).data("handler");
             var cb = callbacks[handler];
             if (typeof cb === 'function')
             {
-                cb();
+                var returnValue = cb(modal,e);
+                if(returnValue === true || typeof returnValue === 'undefined')
+                {
+                    modal.close();
+                }
+            }
+            else
+            {
+                modal.close();
             }
         });
 
@@ -454,7 +488,44 @@ var exports = this;
             });
             this.modal('hide');
         };
-        modal = addFunctions(modal);
+
+        modal.data('options', options);
+        //modal = addFunctions(modal);
+
+        modal.modalResize = function (options)
+        {
+            var allOptions = this.data('options') || {},
+                params = allOptions.resize || {};
+            options = options || {};
+            $.extend(params, options);
+
+            resize.call(modal, params);
+        };
+
+        modal.modalShow = function (fade)
+        {
+            this.hide();
+            this.removeClass('hidden');
+            if (fade)
+            {
+                var speed = parseInt(fade, 10) || 300;
+                this.fadeIn(speed);
+            }
+            else
+            {
+                this.show();
+            }
+        };
+
+        modal.modalPopulate = function (data, resize)
+        {
+            this.find('.modal-body').html(data);
+            if (resize)
+            {
+                this.modalResize();
+            }
+        };
+
         return modal;
     };
 
