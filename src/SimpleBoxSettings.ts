@@ -4,32 +4,27 @@
  * Date: 6/15/13
  * Time: 11:56 AM
  */
-declare module SimpleBox
-{
-    export class SimpleBoxSettings
-    {
-        public animate:Boolean = true;
-        public startHidden:Boolean = false;
 
-        public closeOnEscape:Boolean = false;
-        public onEscape:();
+class SimpleBoxSettings {
+    public animate:Boolean = true;
+    public startHidden:Boolean = false;
 
-        public backdrop:any = 'static';
+    public closeOnEscape:Boolean = false;
+    public onEscape:any;
 
-        public cssClass:String = "";
+    public backdrop:any = 'static';
 
-        public closeButton:Boolean = true;
-        public closeButtonMarkup:String = "";
+    public cssClass:String = "";
 
-        public icons:{} = {};
+    public closeButton:Boolean = true;
+    public closeButtonMarkup:String = "";
 
-        public onEscape:();
+    public icons:{} = {};
 
-        public size:{} = {
-            min:false,
-            max:false
-        };
+    public size:{} = {
+        min: false,
+        max: false
+    };
 
-        public preventScrolling:Boolean = true;
-    }
+    public preventScrolling:Boolean = true;
 }

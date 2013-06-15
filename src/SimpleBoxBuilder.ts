@@ -7,61 +7,46 @@
 ///<reference path='SimpleBox.ts' />
 ///<reference path='SimpleBoxButton.ts' />
 ///<reference path='SimpleBoxSettings.ts' />
-declare module SimpleBox
-{
-    export class SimpleBoxBuilder
-    {
-        private header:String = null;
-        private content:String = "";
-        private buttons:SimpleBoxButton[];
-        private settings:SimpleBoxSettings = new SimpleBoxSettings;
 
-        constructor()
-        {
+class SimpleBoxBuilder {
+    private header:String = null;
+    private content:String = "";
+    private buttons:SimpleBoxButton[] = [];
+    private settings:SimpleBoxSettings = new SimpleBoxSettings;
 
+    public setContent(content:String) {
+        this.content = content;
+        return this;
+    }
+
+    public setHeader(header:String) {
+        this.header = header;
+        return this;
+    }
+
+    public setSettings(settings:SimpleBoxSettings) {
+        this.settings = settings;
+        return this;
+    }
+
+    public addButton(buttonOrLabel:any, callbackOrCssClass?:any, callback?:()=>{}) {
+        var button:SimpleBoxButton;
+        if (buttonOrLabel instanceof SimpleBoxButton) {
+            button = buttonOrLabel;
         }
-
-        public setContent(content:String)
-        {
-            this.content = content;
+        else {
+            button = new SimpleBoxButton(buttonOrLabel, callbackOrCssClass, callback);
         }
+        this.buttons.push(button);
+        return this;
+    }
 
-        public setHeader(header:String)
-        {
-            this.header = header;
-        }
+    public setButtons(buttons:SimpleBoxButton[]) {
+        this.buttons = buttons;
+        return this;
+    }
 
-        public setSettings(settings:SimpleBoxSettings)
-        {
-            this.settings = settings;
-        }
-
-        public addButton(label:String)
-        public addButton(label:String, cssClass:String)
-        public addButton(label:String, callback:());
-        public addButton(label:String, cssClass:String, callback:());
-        public addButton(buttonOrLabel:any, callbackOrCssClass?:any, callback?:())
-        {
-            var button:SimpleBoxButton;
-            if(buttonOrLabel instanceof SimpleBoxButton)
-            {
-                button = buttonOrLabel;
-            }
-            else
-            {
-                button = new SimpleBoxButton(buttonOrLabel, callbackOrCssClass, callback);
-            }
-            this.buttons.push(button);
-        }
-
-        public setButtons(buttons:SimpleBoxButton[])
-        {
-            this.buttons = buttons;
-        }
-
-        public build()
-        {
-            return new SimpleBox(this.header, this.content, this.buttons, this.settings).render();
-        }
+    public build() {
+        return new SimpleBox(this.header, this.content, this.buttons, this.settings).render();
     }
 }

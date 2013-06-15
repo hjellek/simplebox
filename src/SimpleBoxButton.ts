@@ -4,38 +4,24 @@
  * Date: 6/15/13
  * Time: 11:10 AM
  */
-///<reference path='SimpleBox.ts' />
-///<reference path='SimpleBoxBuilder.ts' />
-declare module SimpleBox
-{
-    export class SimpleBoxButton
-    {
-        public label:String = "";
-        public cssClass:String = "";
-        public callback:();
-        public icon:String;
+class SimpleBoxButton {
+    public label:String = "";
+    public cssClass:String = "";
+    public callback:()=>{};
+    public icon:String;
 
-        constructor(label:String);
-        constructor(label:String, cssClass:String);
-        constructor(label:String, callback:());
-        constructor(label:String, callbackOrCssClass?:any, callback?:())
-        {
-            this.label = label;
-            if(callbackOrCssClass)
-            {
-                if(callbackOrCssClass instanceof String)
-                {
-                    this.cssClass = callbackOrCssClass;
-                }
-                else if(typeof callbackOrCssClass == 'function')
-                {
-                    this.callback = callbackOrCssClass;
-                }
+    constructor(label:String, callbackOrCssClass?:any, callback?:()=>{}) {
+        this.label = label;
+        if (callbackOrCssClass) {
+            if (callbackOrCssClass instanceof String) {
+                this.cssClass = callbackOrCssClass;
             }
-            if(callback)
-            {
-                this.callback = callback;
+            else if (typeof callbackOrCssClass == 'function') {
+                this.callback = callbackOrCssClass;
             }
+        }
+        if (callback) {
+            this.callback = callback;
         }
     }
 }
