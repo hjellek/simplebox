@@ -190,6 +190,16 @@
             <button id="button-modal-2" class="btn btn-success">Unclosable</button>
         </div>
     </div>
+    <div class="row">
+        <div class="span12">
+            <h2>Shorthand syntax</h2>
+            <code>
+                var box = new Simple.Box("RLY SHRT", "Shorthand setup", [{label:"Ok"}]).render();
+            </code>
+            <br />
+            <button id="button-modal-3" class="btn btn-success">Still behaves the same</button>
+        </div>
+    </div>
 
     <hr>
 
@@ -260,6 +270,11 @@
                     .setContent("Try if you can")
                     .addButton('Try to close', 'btn-primary', onClick)
                     .render();
+        });
+
+        $('#button-modal-3').click(function(e)
+        {
+            var box = new Simple.Box("RLY SHRT", "Shorthand syntax", [{label:"Ok"}]).render();
         });
     });
 </script>
