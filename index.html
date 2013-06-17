@@ -207,11 +207,11 @@
     {
         $('#standard-modal').click(function(e)
         {
-            var box = Simple.Box.Builder()
+            var box = new Simple.Box()
                     .setHeader("Awesome!")
                     .setContent("My first modal - all teh contents")
                     .addButton('Ok, I get it', 'btn-success')
-                    .build();
+                    .render();
         });
 
         $('#resize-modal-1').click(function(e)
@@ -221,13 +221,13 @@
                 "<p>Quisque vestibulum, dui quis fermentum lobortis, diam nibh volutpat nunc, eget tempor odio ante nec metus. Integer consequat egestas nibh ut blandit. Ut nec condimentum nisl. Nullam non mauris et nulla condimentum aliquam id nec metus. Nulla vulputate mauris sit amet commodo gravida. Aenean quis quam rhoncus justo faucibus hendrerit. Vestibulum sed arcu eros. In mattis mauris at mauris dictum tempor. Ut suscipit vulputate odio, vitae lobortis ante malesuada ac. In dui lectus, molestie ut dui nec, egestas tempor nibh. Aenean eu tristique nulla. Aenean pulvinar ipsum sed sapien consectetur, ut euismod risus pellentesque. Cras condimentum mi lorem, vel elementum justo pulvinar non.</p>"+
                 "<p>Sed ac elit nibh. Nulla fringilla dapibus justo, id vehicula magna lobortis at. Morbi venenatis nisl vitae orci commodo, a mattis felis ullamcorper. Vestibulum tempor sem in dolor auctor, id laoreet est vehicula. Praesent imperdiet, leo sed porttitor mollis, erat est gravida nunc, vel ullamcorper velit massa eu mauris. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris consectetur lorem eget neque luctus bibendum nec id diam. Vestibulum ornare nulla risus, et condimentum metus tincidunt vitae. Nullam nunc erat, lobortis sed massa at, blandit interdum justo.";
 
-            var box = Simple.Box.Builder()
+            var box = new Simple.Box()
                     .setHeader("Resize!")
                     .setContent(content)
                     .addButton('close')
                     .setSetting('autoResize', true)
                     .setSetting('size', {min:400})
-                    .build();
+                    .render();
         });
 
         $('#button-modal-1').click(function(e)
@@ -240,12 +240,12 @@
             {
                 alert('You agree to nothing I guess');
             };
-            var box = Simple.Box.Builder()
+            var box = new Simple.Box()
                     .setHeader("Many buttons!")
                     .setContent("Sir, you have lots of choices")
                     .addButton('Agree', 'btn-success', onAgree)
                     .addButton('Disagree', 'btn-danger', onDisagree)
-                    .build();
+                    .render();
         });
 
         $('#button-modal-2').click(function(e)
@@ -255,11 +255,11 @@
                 alert('Will not close!');
                 return false;
             };
-            var box = Simple.Box.Builder()
+            var box = new Simple.Box()
                     .setHeader("Un-closable")
                     .setContent("Try if you can")
                     .addButton('Try to close', 'btn-primary', onClick)
-                    .build();
+                    .render();
         });
     });
 </script>
