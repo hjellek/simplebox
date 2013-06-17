@@ -152,7 +152,7 @@ class SimpleBox {
         else if (this.settings.closeButton) {
             parts.push(this.createModalCloseButton());
         }
-        parts.push("<div class='modal-body'>" + this.content + "</div>");
+        parts.push("<div class='modal-body'><div>" + this.content + "</div></div>");
         if (this.buttons.length > 0) {
             parts.push("<div class='modal-footer'>" + this.createButtonMarkup() + "</div>")
         }
