@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SimpleBox demo</title>
+    <title>Simple.Box demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -13,6 +13,13 @@
         body {
             padding-top: 20px;
             padding-bottom: 60px;
+        }
+
+        body.simplebox-open .container
+        {
+            position: fixed;
+            left: 50%;
+            margin-left: -350px;
         }
 
             /* Custom container */
@@ -79,6 +86,21 @@
             border-right: 0;
             border-radius: 0 3px 3px 0;
         }
+
+        .row
+        {
+            height: 250px;
+        }
+
+        .modal-body
+        {
+            max-height: none;
+        }
+
+        .modal.fade.in
+        {
+            top: 50%;
+        }
     </style>
 </head>
 
@@ -108,7 +130,32 @@
 
     <div class="row">
         <div class="span6">
+            <p>A regular modal appearing mid screen</p>
+            <code>
+                var box = Simple.Box.Builder()<br />
+                .setHeader("Awesome!")<br />
+                .setContent("My first modal - all teh contents")<br />
+                .addButton('Ok, I get it', 'btn-success')<br />
+                .build();
+            </code>
+            <br />
             <button id="standard-modal" class="btn btn-success">A regular modal</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6">
+            <p>Auto-resizing modal with a minimum size limit</p>
+            <code>
+                var box = Simple.Box.Builder()<br />
+                .setHeader("Resize!")<br />
+                .setContent(content)<br />
+                .addButton('close')<br />
+                .setSetting('autoResize', true)<br />
+                .setSetting('size', {min:400})<br />
+                .build();
+            </code>
+            <br />
+            <button id="resize-modal-1" class="btn btn-success">A resizing modal</button>
         </div>
     </div>
 
@@ -123,23 +170,32 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <script src="src/SimpleBox.js"></script>
-<script src="src/SimpleBoxButton.js"></script>
-<script src="src/SimpleBoxBuilder.js"></script>
-<script src="src/SimpleBoxSettings.js"></script>
 <script>
     $(document).ready(function()
     {
-        console.log('started');
         $('#standard-modal').click(function(e)
         {
-            var box = SimpleBox.Builder()
+            var box = Simple.Box.Builder()
                     .setHeader("Awesome!")
                     .setContent("My first modal - all teh contents")
-                    .addButton(new SimpleBoxButton('Ok'))
+                    .addButton('Ok, I get it', 'btn-success')
                     .build();
+        });
 
+        $('#resize-modal-1').click(function(e)
+        {
+            var content = "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur varius fringilla vestibulum. Aliquam erat volutpat. Donec et ligula ut odio luctus pulvinar. Vestibulum blandit tincidunt purus, ut viverra libero pulvinar eu. Vestibulum vitae lectus ultricies, sagittis nisl id, tristique augue. Duis vulputate vitae nibh in lobortis. Ut in felis sem. In dignissim neque a nunc congue, et dictum eros pulvinar.</p>"+
+                "<p>Integer aliquam sollicitudin justo, vitae pellentesque nunc pulvinar non. Curabitur sagittis elit nunc, sit amet porta est pharetra ut. Integer varius faucibus justo. Praesent placerat sed magna vitae placerat. Donec sollicitudin convallis quam, at congue ipsum ultrices et. Aliquam dictum mauris eget mi venenatis varius. Curabitur justo lorem, fermentum in ipsum ac, suscipit tristique augue. Phasellus accumsan sed purus eget luctus. Nam in imperdiet massa. Etiam et feugiat urna, at sagittis est. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam consectetur non leo sagittis aliquam. Nunc vehicula velit in adipiscing accumsan. Curabitur accumsan interdum adipiscing. Fusce vitae lacus eleifend, gravida sem et, suscipit quam. Etiam sollicitudin urna id tempus fermentum.</p>"+
+                "<p>Quisque vestibulum, dui quis fermentum lobortis, diam nibh volutpat nunc, eget tempor odio ante nec metus. Integer consequat egestas nibh ut blandit. Ut nec condimentum nisl. Nullam non mauris et nulla condimentum aliquam id nec metus. Nulla vulputate mauris sit amet commodo gravida. Aenean quis quam rhoncus justo faucibus hendrerit. Vestibulum sed arcu eros. In mattis mauris at mauris dictum tempor. Ut suscipit vulputate odio, vitae lobortis ante malesuada ac. In dui lectus, molestie ut dui nec, egestas tempor nibh. Aenean eu tristique nulla. Aenean pulvinar ipsum sed sapien consectetur, ut euismod risus pellentesque. Cras condimentum mi lorem, vel elementum justo pulvinar non.</p>"+
+                "<p>Sed ac elit nibh. Nulla fringilla dapibus justo, id vehicula magna lobortis at. Morbi venenatis nisl vitae orci commodo, a mattis felis ullamcorper. Vestibulum tempor sem in dolor auctor, id laoreet est vehicula. Praesent imperdiet, leo sed porttitor mollis, erat est gravida nunc, vel ullamcorper velit massa eu mauris. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris consectetur lorem eget neque luctus bibendum nec id diam. Vestibulum ornare nulla risus, et condimentum metus tincidunt vitae. Nullam nunc erat, lobortis sed massa at, blandit interdum justo.";
 
-
+            var box = Simple.Box.Builder()
+                    .setHeader("Resize!")
+                    .setContent(content)
+                    .addButton('close')
+                    .setSetting('autoResize', true)
+                    .setSetting('size', {min:400})
+                    .build();
         });
     });
 </script>
