@@ -423,3 +423,98 @@ class CallbackHolder {
         return this.callbacks[index];
     }
 }
+
+class SimpleBoxSettings {
+    public animate:Boolean = true;
+    public startHidden:Boolean = false;
+
+    public closeOnEscape:Boolean = false;
+    public onEscape:any;
+
+    public backdrop:any = 'static';
+
+    public cssClass:String = "";
+
+    public closeButton:Boolean = true;
+    public closeButtonMarkup:String = "";
+
+    public icons:{} = {};
+
+    public size:{} = {
+        min: false,
+        max: false
+    };
+
+    public preventScrolling:Boolean = true;
+}
+
+class SimpleBoxButton {
+    public label:String = "";
+    public cssClass:String = "";
+    public callback:()=>{};
+    public icon:String;
+
+    constructor(label:String, callbackOrCssClass?:any, callback?:()=>{}) {
+        this.label = label;
+        if (callbackOrCssClass) {
+            if (callbackOrCssClass instanceof String) {
+                this.cssClass = callbackOrCssClass;
+            }
+            else if (typeof callbackOrCssClass == 'function') {
+                this.callback = callbackOrCssClass;
+            }
+        }
+        if (callback) {
+            this.callback = callback;
+        }
+    }
+}
+
+class SimpleBoxBuilder {
+    private header:String = null;
+    private content:String = "";
+    private buttons:SimpleBoxButton[] = [];
+    private settings:SimpleBoxSettings = new SimpleBoxSettings;
+
+    public setContent(content:String) {
+        this.content = content;
+        return this;
+    }
+
+    public setHeader(header:String) {
+        this.header = header;
+        return this;
+    }
+
+    public setSetting(attribute:String, value:any)
+    {
+        this.settings[attribute] = value;
+        return this;
+    }
+
+    public setSettings(settings:SimpleBoxSettings) {
+        this.settings = settings;
+        return this;
+    }
+
+    public addButton(buttonOrLabel:any, callbackOrCssClass?:any, callback?:()=>{}) {
+        var button:SimpleBoxButton;
+        if (buttonOrLabel instanceof SimpleBoxButton) {
+            button = buttonOrLabel;
+        }
+        else {
+            button = new SimpleBoxButton(buttonOrLabel, callbackOrCssClass, callback);
+        }
+        this.buttons.push(button);
+        return this;
+    }
+
+    public setButtons(buttons:SimpleBoxButton[]) {
+        this.buttons = buttons;
+        return this;
+    }
+
+    public build() {
+        return new SimpleBox(this.header, this.content, this.buttons, this.settings).render();
+    }
+}
