@@ -16,6 +16,7 @@ class SimpleBox {
 
     private callbackHolder = new CallbackHolder();
     private hideSource:String;
+    private scrollPosition:Number;
 
 
     private header:String;
@@ -234,6 +235,17 @@ class SimpleBox {
             "backdrop": backdrop,
             "keyboard": this.settings.closeOnEscape
         });
+
+        if(this.settings.preventScrolling)
+        {
+            this.scrollPosition = $(window).scrollTop();
+            $('body').css('margin-top', '-' + this.scrollPosition + 'px');
+            modal.bind('hidden', function ()
+            {
+                $('body').css('margin-top', '');
+                $(window).scrollTop(self.scrollPosition);
+            });
+        }
 
         if (backdropAlreadyExists) {
             this.moveBackdropToModal(modal);
