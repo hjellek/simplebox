@@ -3,33 +3,48 @@ var Simple;
     var Box = (function () {
         function Box(header, content, buttons, settings) {
             this.callbackHolder = new CallbackHolder();
-            this.header = header;
-            this.content = content;
-            this.buttons = buttons;
-            this.settings = settings;
+            this.header = header || "";
+            this.content = content || "";
+            this.buttons = buttons || [];
+            this.settings = settings || new Simple.Settings();
         }
         Box.ESCAPE_KEY = 27;
         Box.HIDESOURCE_ESCAPE = 'escape';
         Box.HIDESOURCE_BUTTON = 'button';
         Box.EVENT_RESIZE = 'simplebox.resize';
-        Box.create = function create(headerOrContent, contentOrButtons, buttonsOrSettings, settings) {
-            var header, content, buttons, settingsMayhaps;
-            if(contentOrButtons instanceof Array) {
-                content = headerOrContent;
-            } else {
-                header = headerOrContent;
-                content = contentOrButtons;
-            }
-            if(buttonsOrSettings instanceof SimpleBoxSettings) {
-                settingsMayhaps = buttonsOrSettings;
-            } else {
-                buttons = buttonsOrSettings;
-                settingsMayhaps = settings;
-            }
-            return new Simple.Box(header, content, buttons, settingsMayhaps);
+        Box.prototype.setContent = function (content) {
+            this.content = content;
+            return this;
         };
-        Box.Builder = function Builder() {
-            return new SimpleBoxBuilder();
+        Box.prototype.setHeader = function (header) {
+            this.header = header;
+            return this;
+        };
+        Box.prototype.setSetting = function (attribute, value) {
+            this.settings[attribute] = value;
+            return this;
+        };
+        Box.prototype.setSettings = function (settings) {
+            this.settings = settings;
+            return this;
+        };
+        Box.prototype.addButton = function (label, callbackOrCssClass, callback) {
+            var cssClass = "", onClick = $.noop;
+            if(typeof callbackOrCssClass == 'function') {
+                onClick = callbackOrCssClass;
+            } else {
+                cssClass = callbackOrCssClass;
+                if(callback) {
+                    onClick = callback;
+                }
+            }
+            var button = new SimpleBoxButton(label, cssClass, onClick);
+            this.buttons.push(button);
+            return this;
+        };
+        Box.prototype.setButtons = function (buttons) {
+            this.buttons = buttons;
+            return this;
         };
         Box.prototype.createButtonMarkup = function () {
             var markup = "", numberOfButtons = this.buttons.length;
@@ -161,7 +176,7 @@ var Simple;
                 }
             });
             modal.bind('shown', function () {
-                $("a.btn-primary:last", modal).focus();
+                $("a.btn:first", modal).focus();
             });
             if(this.settings.preventScrolling) {
                 modal.bind('show', function () {
@@ -343,8 +358,8 @@ var Simple;
         };
         return CallbackHolder;
     })();    
-    var SimpleBoxSettings = (function () {
-        function SimpleBoxSettings() {
+    var Settings = (function () {
+        function Settings() {
             this.animate = true;
             this.startHidden = false;
             this.closeOnEscape = false;
@@ -362,8 +377,9 @@ var Simple;
             this.autoResize = false;
             this.preventScrolling = true;
         }
-        return SimpleBoxSettings;
-    })();    
+        return Settings;
+    })();
+    Simple.Settings = Settings;    
     var SimpleBoxButton = (function () {
         function SimpleBoxButton(label, callbackOrCssClass, callback) {
             this.label = "";
@@ -381,47 +397,5 @@ var Simple;
             }
         }
         return SimpleBoxButton;
-    })();    
-    var SimpleBoxBuilder = (function () {
-        function SimpleBoxBuilder() {
-            this.header = null;
-            this.content = "";
-            this.buttons = [];
-            this.settings = new SimpleBoxSettings();
-        }
-        SimpleBoxBuilder.prototype.setContent = function (content) {
-            this.content = content;
-            return this;
-        };
-        SimpleBoxBuilder.prototype.setHeader = function (header) {
-            this.header = header;
-            return this;
-        };
-        SimpleBoxBuilder.prototype.setSetting = function (attribute, value) {
-            this.settings[attribute] = value;
-            return this;
-        };
-        SimpleBoxBuilder.prototype.setSettings = function (settings) {
-            this.settings = settings;
-            return this;
-        };
-        SimpleBoxBuilder.prototype.addButton = function (buttonOrLabel, callbackOrCssClass, callback) {
-            var button;
-            if(buttonOrLabel instanceof SimpleBoxButton) {
-                button = buttonOrLabel;
-            } else {
-                button = new SimpleBoxButton(buttonOrLabel, callbackOrCssClass, callback);
-            }
-            this.buttons.push(button);
-            return this;
-        };
-        SimpleBoxBuilder.prototype.setButtons = function (buttons) {
-            this.buttons = buttons;
-            return this;
-        };
-        SimpleBoxBuilder.prototype.build = function () {
-            return new Simple.Box(this.header, this.content, this.buttons, this.settings).render();
-        };
-        return SimpleBoxBuilder;
     })();    
 })(Simple || (Simple = {}));
