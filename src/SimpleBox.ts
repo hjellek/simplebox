@@ -230,7 +230,6 @@ module Simple
             if (this.settings.preventScrolling) {
                 modal.bind('show', function () {
                     self.scrollPosition = $(window).scrollTop();
-                    console.log('scrollpos', self.scrollPosition);
                     DOMBody.css('margin-top', '-' + self.scrollPosition + 'px');
                     DOMBody.addClass('simplebox-open');
                 });
@@ -238,8 +237,7 @@ module Simple
         }
 
         public render() {
-            var self:Simple.Box = this,
-                modal = $(this.createModalMarkup()),
+            var modal = $(this.createModalMarkup()),
                 DOMBody = $('body');
 
             if (this.settings.animate) {
@@ -291,8 +289,6 @@ module Simple
                 var settings = self.settings.size;
                 $.extend(settings, options);
 
-                console.log('modalResize', settings, options);
-
                 var sizes = self.calculateSizesForModal(modal, settings);
                 self.resizeModalTo(modal, sizes);
                 self.positionModalTo(modal, sizes);
@@ -319,7 +315,6 @@ module Simple
         }
 
         private calculateSizesForModal(modal, options) {
-            console.log('resize', options);
             var $body:JQuery = modal.find('.modal-body'),
                 height:Number = 0,
                 viewHeight:Number = $(window).innerHeight(),
@@ -375,12 +370,10 @@ module Simple
                 modalSize.contentHeight = height - (headerAndFooterOffset + padding);
             }
 
-            console.log('Calculated size: ', modalSize);
             return modalSize;
         }
 
         private resizeModalTo($modal, sizes) {
-            console.log('resizeModalTo', sizes.totalHeight, sizes.contentHeight);
             var $body = $modal.find('.modal-body'),
                 bodyCss = {
                     'height': sizes.contentHeight
@@ -405,7 +398,6 @@ module Simple
 
         private positionModalTo(modal, sizes)
         {
-            console.log('resizeModalTo', sizes.totalHeight, sizes.contentHeight);
             modal.css({'margin-top': -(sizes.totalHeight / 2)});
         }
 
@@ -446,7 +438,6 @@ module Simple
                 footer = $footer.outerHeight();
             }
             tmpModal.remove();
-            console.log('modalAreaSizes', {header: header, body: body, footer: footer});
             return {header: header, body: body, footer: footer};
         }
     }
