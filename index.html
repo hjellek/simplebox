@@ -89,7 +89,7 @@
 
         .row
         {
-            height: 250px;
+            margin-bottom: 50px;
         }
 
         .modal-body
@@ -129,8 +129,8 @@
     </div>
 
     <div class="row">
-        <div class="span6">
-            <p>A regular modal appearing mid screen</p>
+        <div class="span12">
+            <h2>A regular modal appearing mid screen</h2>
             <code>
                 var box = Simple.Box.Builder()<br />
                 .setHeader("Awesome!")<br />
@@ -143,8 +143,8 @@
         </div>
     </div>
     <div class="row">
-        <div class="span6">
-            <p>Auto-resizing modal with a minimum size limit</p>
+        <div class="span12">
+            <h2>Auto-resizing modal with a minimum size limit</h2>
             <code>
                 var box = Simple.Box.Builder()<br />
                 .setHeader("Resize!")<br />
@@ -156,6 +156,49 @@
             </code>
             <br />
             <button id="resize-modal-1" class="btn btn-success">A resizing modal</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span12">
+            <h2>Multiple buttons, multiple callbacks</h2>
+            <code>
+                var onAgree = function()<br />
+                {<br />
+                alert('You have agreed to everything');<br />
+                };<br />
+                var onDisagree = function()<br />
+                {<br />
+                alert('You agree to nothing I guess');<br />
+                };<br />
+                var box = Simple.Box.Builder()<br />
+                .setHeader("Many buttons!")<br />
+                .setContent("Sir, you have lots of choices")<br />
+                .addButton('Agree', 'btn-success', onAgree)<br />
+                .addButton('Disagree', 'btn-danger', onDisagree)<br />
+                .build();
+            </code>
+            <br />
+            <button id="button-modal-1" class="btn btn-success">Modal with many buttons</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+            <h2>Unclosable</h2>
+            <code>
+                var onClick = function()<br />
+                {<br />
+                alert('Will not close!');<br />
+                return false;<br />
+                };<br />
+                var box = Simple.Box.Builder()<br />
+                .setHeader("Un-closable")<br />
+                .setContent("Try if you can")<br />
+                .addButton('Try to close', 'btn-primary', onClick)<br />
+                .build();
+            </code>
+            <br />
+            <button id="button-modal-2" class="btn btn-success">Unclosable</button>
         </div>
     </div>
 
@@ -195,6 +238,38 @@
                     .addButton('close')
                     .setSetting('autoResize', true)
                     .setSetting('size', {min:400})
+                    .build();
+        });
+
+        $('#button-modal-1').click(function(e)
+        {
+            var onAgree = function()
+            {
+                alert('You have agreed to everything');
+            };
+            var onDisagree = function()
+            {
+                alert('You agree to nothing I guess');
+            };
+            var box = Simple.Box.Builder()
+                    .setHeader("Many buttons!")
+                    .setContent("Sir, you have lots of choices")
+                    .addButton('Agree', 'btn-success', onAgree)
+                    .addButton('Disagree', 'btn-danger', onDisagree)
+                    .build();
+        });
+
+        $('#button-modal-2').click(function(e)
+        {
+            var onClick = function()
+            {
+                alert('Will not close!');
+                return false;
+            };
+            var box = Simple.Box.Builder()
+                    .setHeader("Un-closable")
+                    .setContent("Try if you can")
+                    .addButton('Try to close', 'btn-primary', onClick)
                     .build();
         });
     });
