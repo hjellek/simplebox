@@ -447,7 +447,7 @@ module Simple
 
         public add(callback:()=>{}) {
             this.callbacks.push(callback);
-            return this.callbacks.length;
+            return this.callbacks.length-1;
         }
 
         public get(index:Number):()=>{} {
