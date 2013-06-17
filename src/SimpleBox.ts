@@ -253,6 +253,12 @@ class SimpleBox {
 
         this.createHelperFunctions(modal);
 
+        var sizeSettings = this.settings.size;
+        if(sizeSettings.min !== false || sizeSettings.max !== false)
+        {
+            modal.modalResize();
+        }
+
         return modal;
     }
 
