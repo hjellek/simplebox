@@ -237,7 +237,7 @@ module Simple
             });
 
             modal.bind('shown', function () {
-                $("a.btn-primary:last", modal).focus();
+                $("a.btn:first", modal).focus();
             });
 
             if (this.settings.preventScrolling) {
