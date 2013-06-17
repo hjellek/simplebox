@@ -186,17 +186,13 @@ module Simple
                 }
             });
 
-            if(this.settings.autoResize)
-            {
+            if (this.settings.autoResize) {
                 var resizeTimer;
-                resizeModalOnWindowResize = function ()
-                {
-                    if(resizeTimer)
-                    {
+                resizeModalOnWindowResize = function () {
+                    if (resizeTimer) {
                         clearTimeout(resizeTimer);
                     }
-                    resizeTimer = setTimeout(function ()
-                    {
+                    resizeTimer = setTimeout(function () {
                         self.resizeAndPosition(modal);
                     }, 100);
                 };
@@ -211,8 +207,7 @@ module Simple
                 if (self.settings.preventScrolling) {
 
                 }
-                if(self.settings.autoResize)
-                {
+                if (self.settings.autoResize) {
                     $window.unbind('resize', resizeModalOnWindowResize);
                 }
             });
@@ -355,17 +350,15 @@ module Simple
             }
 
             var modalSize:Object = {
-                totalHeight:0,
-                contentHeight:0
+                totalHeight: 0,
+                contentHeight: 0
             };
 
-            if (contentHeight && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || contentHeight <= max)))
-            {
+            if (contentHeight && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || contentHeight <= max))) {
                 modalSize.totalHeight = height + (headerAndFooterOffset + padding);
                 modalSize.contentHeight = height;
             }
-            else
-            {
+            else {
                 modalSize.totalHeight = height;
                 modalSize.contentHeight = height - (headerAndFooterOffset + padding);
             }
@@ -396,13 +389,11 @@ module Simple
             }
         }
 
-        private positionModalTo(modal, sizes)
-        {
+        private positionModalTo(modal, sizes) {
             modal.css({'margin-top': -(sizes.totalHeight / 2)});
         }
 
-        private resizeAndPosition(modal)
-        {
+        private resizeAndPosition(modal) {
             var sizeSettings = this.settings.size;
             var sizes = this.calculateSizesForModal(modal, sizeSettings);
             this.positionModalTo(modal, sizes);
@@ -447,7 +438,7 @@ module Simple
 
         public add(callback:()=>{}) {
             this.callbacks.push(callback);
-            return this.callbacks.length-1;
+            return this.callbacks.length - 1;
         }
 
         public get(index:Number):()=>{} {
@@ -482,7 +473,7 @@ module Simple
         public size:{} = {
             min: false,
             max: false,
-            content:true
+            content: true
         };
 
         public autoResize:Boolean = false;
@@ -490,7 +481,7 @@ module Simple
         public preventScrolling:Boolean = true;
     }
 
-    class SimpleBoxButton implements Button{
+    class SimpleBoxButton implements Button {
         public label:String = "";
         public cssClass:String = "";
         public callback:()=>{};
