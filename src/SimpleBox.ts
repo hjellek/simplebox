@@ -20,40 +20,58 @@ module Simple
         private header:String;
         private content:String;
         private buttons:Button[];
-        private settings:SimpleBoxSettings;
+        private settings:Simple.Settings;
 
-        constructor(header:String, content:String, buttons:Button[], settings:SimpleBoxSettings) {
-            this.header = header;
+        constructor(header?:String, content?:String, buttons?:Button[], settings?:Simple.Settings) {
+            this.header =  header||"";
+            this.content = content||"";
+            this.buttons = buttons||[];
+            this.settings = settings||new Simple.Settings();
+        }
+
+        public setContent(content:String) {
             this.content = content;
-            this.buttons = buttons;
+            return this;
+        }
+
+        public setHeader(header:String) {
+            this.header = header;
+            return this;
+        }
+
+        public setSetting(attribute:String, value:any) {
+            this.settings[attribute] = value;
+            return this;
+        }
+
+        public setSettings(settings:Simple.Settings) {
             this.settings = settings;
+            return this;
         }
 
-        public static create(headerOrContent:String, contentOrButtons:String, buttonsOrSettings?:Button[], settings?:SimpleBoxSettings):Simple.Box {
-            var header,
-                content,
-                buttons,
-                settingsMayhaps;
-
-            if (contentOrButtons instanceof Array) {
-                content = headerOrContent
+        public addButton(label:any, callbackOrCssClass?:any, callback?:()=>{}) {
+            var cssClass="",
+                onClick= $.noop;
+            if(typeof callbackOrCssClass == 'function')
+            {
+                onClick = callbackOrCssClass;
             }
-            else {
-                header = headerOrContent;
-                content = contentOrButtons;
+            else
+            {
+                cssClass = callbackOrCssClass;
+                if(callback)
+                {
+                    onClick = callback;
+                }
             }
-            if (buttonsOrSettings instanceof SimpleBoxSettings) {
-                settingsMayhaps = buttonsOrSettings;
-            }
-            else {
-                buttons = buttonsOrSettings;
-                settingsMayhaps = settings;
-            }
-            return new Simple.Box(header, content, buttons, settingsMayhaps);
+            var button:SimpleBoxButton = new SimpleBoxButton(label, cssClass, onClick);
+            this.buttons.push(button);
+            return this;
         }
 
-        public static Builder():SimpleBoxBuilder {
-            return new SimpleBoxBuilder();
+        public setButtons(buttons:SimpleBoxButton[]) {
+            this.buttons = buttons;
+            return this;
         }
 
         private createButtonMarkup() {
@@ -454,7 +472,7 @@ module Simple
         icon:String;
     }
 
-    class SimpleBoxSettings {
+    export class Settings {
         public animate:Boolean = true;
         public startHidden:Boolean = false;
 
@@ -500,54 +518,6 @@ module Simple
             if (callback) {
                 this.callback = callback;
             }
-        }
-    }
-
-    class SimpleBoxBuilder {
-        private header:String = null;
-        private content:String = "";
-        private buttons:SimpleBoxButton[] = [];
-        private settings:SimpleBoxSettings = new SimpleBoxSettings;
-
-        public setContent(content:String) {
-            this.content = content;
-            return this;
-        }
-
-        public setHeader(header:String) {
-            this.header = header;
-            return this;
-        }
-
-        public setSetting(attribute:String, value:any) {
-            this.settings[attribute] = value;
-            return this;
-        }
-
-        public setSettings(settings:SimpleBoxSettings) {
-            this.settings = settings;
-            return this;
-        }
-
-        public addButton(buttonOrLabel:any, callbackOrCssClass?:any, callback?:()=>{}) {
-            var button:SimpleBoxButton;
-            if (buttonOrLabel instanceof SimpleBoxButton) {
-                button = buttonOrLabel;
-            }
-            else {
-                button = new SimpleBoxButton(buttonOrLabel, callbackOrCssClass, callback);
-            }
-            this.buttons.push(button);
-            return this;
-        }
-
-        public setButtons(buttons:SimpleBoxButton[]) {
-            this.buttons = buttons;
-            return this;
-        }
-
-        public build() {
-            return new Simple.Box(this.header, this.content, this.buttons, this.settings).render();
         }
     }
 }
