@@ -15,51 +15,55 @@ module Simple
         private callbackHolder = new CallbackHolder();
         private hideSource:String;
         private scrollPosition:Number;
-
-
         private header:String;
         private content:String;
         private buttons:Button[];
         private settings:Simple.Settings;
 
-        constructor(header?:String, content?:String, buttons?:Button[], settings?:Simple.Settings) {
-            this.header =  header||"";
-            this.content = content||"";
-            this.buttons = buttons||[];
-            this.settings = settings||new Simple.Settings();
+        constructor(header?:String, content?:String, buttons?:Button[], settings?:Simple.Settings)
+        {
+            this.header = header || "";
+            this.content = content || "";
+            this.buttons = buttons || [];
+            this.settings = settings || new Simple.Settings();
         }
 
-        public setContent(content:String) {
+        public setContent(content:String)
+        {
             this.content = content;
             return this;
         }
 
-        public setHeader(header:String) {
+        public setHeader(header:String)
+        {
             this.header = header;
             return this;
         }
 
-        public setSetting(attribute:String, value:any) {
+        public setSetting(attribute:String, value:any)
+        {
             this.settings[attribute] = value;
             return this;
         }
 
-        public setSettings(settings:Simple.Settings) {
+        public setSettings(settings:Simple.Settings)
+        {
             this.settings = settings;
             return this;
         }
 
-        public addButton(label:any, callbackOrCssClass?:any, callback?:()=>{}) {
-            var cssClass="",
-                onClick= $.noop;
-            if(typeof callbackOrCssClass == 'function')
+        public addButton(label:any, callbackOrCssClass?:any, callback?:()=>{})
+        {
+            var cssClass = "",
+                onClick = $.noop;
+            if (typeof callbackOrCssClass == 'function')
             {
                 onClick = callbackOrCssClass;
             }
             else
             {
                 cssClass = callbackOrCssClass;
-                if(callback)
+                if (callback)
                 {
                     onClick = callback;
                 }
@@ -69,30 +73,36 @@ module Simple
             return this;
         }
 
-        public setButtons(buttons:SimpleBoxButton[]) {
+        public setButtons(buttons:SimpleBoxButton[])
+        {
             this.buttons = buttons;
             return this;
         }
 
-        private createButtonMarkup() {
+        private createButtonMarkup()
+        {
             var markup = "",
                 numberOfButtons = this.buttons.length;
 
-            for (var i = 0; i < numberOfButtons; i++) {
+            for (var i = 0; i < numberOfButtons; i++)
+            {
                 var button:SimpleBoxButton = this.buttons[i],
                     iconMarkup = "",
                     dataHandlerMarkup = "",
                     cssClass = "",
                     label = button.label;
 
-                if (button.icon) {
+                if (button.icon)
+                {
                     iconMarkup = "<i class='" + button.icon + "'></i> ";
                 }
-                if (button.callback) {
+                if (button.callback)
+                {
                     var callbackIndex = this.callbackHolder.add(button.callback);
                     dataHandlerMarkup = "data-handler='" + callbackIndex + "'";
                 }
-                if (button.cssClass) {
+                if (button.cssClass)
+                {
                     cssClass = button.cssClass;
                 }
 
@@ -101,147 +111,187 @@ module Simple
             return markup
         }
 
-        private createModalHeaderMarkup() {
+        private createModalHeaderMarkup()
+        {
             var closeButtonMarkup = "";
-            if (this.settings.closeButton) {
-                if (this.settings.closeButtonMarkup) {
+            if (this.settings.closeButton)
+            {
+                if (this.settings.closeButtonMarkup)
+                {
                     closeButtonMarkup = this.settings.closeButtonMarkup;
                 }
-                else {
+                else
+                {
                     closeButtonMarkup = "<a href='#' class='close'>&times;</a>";
                 }
             }
             return "<div class='modal-header'>" + closeButtonMarkup + "<h3>" + this.header + "</h3></div>";
         }
 
-        private createModalCloseButton() {
-            if (this.settings.closeButtonMarkup) {
+        private createModalCloseButton()
+        {
+            if (this.settings.closeButtonMarkup)
+            {
                 return this.settings.closeButtonMarkup;
             }
             return "<a href='#' class='close'></a>";
         }
 
-        private backDropExists() {
+        private backDropExists()
+        {
             return $('.modal-backdrop').length !== 0;
         }
 
-        private moveBackdropToModal(modal) {
+        private moveBackdropToModal(modal)
+        {
             var z = modal.css('z-index') - 5;
             $('.modal-backdrop').css('z-index', z);
             $('body').addClass('modal-open');
         }
 
-        private moveBackdropToPreviousModalOrRemove() {
+        private moveBackdropToPreviousModalOrRemove()
+        {
             var modals = $('.modal');
-            if (modals.length <= 0) {
-                if (this.settings.animate) {
-                    $('.modal-backdrop').fadeOut(300, function () {
+            if (modals.length <= 0)
+            {
+                if (this.settings.animate)
+                {
+                    $('.modal-backdrop').fadeOut(300, function ()
+                    {
                         $('.modal-backdrop').remove();
                         $('body').removeClass('modal-open');
                     });
                 }
-                else {
+                else
+                {
                     $('.modal-backdrop').remove();
                     $('body').removeClass('modal-open');
                 }
             }
-            else {
+            else
+            {
                 this.moveBackdropToModal(modals.last());
             }
         }
 
-        public setIcons(icons) {
+        public setIcons(icons)
+        {
             this.settings.icons = icons;
         }
 
-        public static closeAll() {
+        public static closeAll()
+        {
             $(".simplebox").modal("hide");
         }
 
-        private createModalMarkup() {
+        private createModalMarkup()
+        {
             var parts = [];
             parts.push("<div class='simplebox modal " + this.settings.cssClass + "'>");
-            if (this.header) {
+            if (this.header)
+            {
                 parts.push(this.createModalHeaderMarkup());
             }
-            else if (this.settings.closeButton) {
+            else if (this.settings.closeButton)
+            {
                 parts.push(this.createModalCloseButton());
             }
             parts.push("<div class='modal-body'><div>" + this.content + "</div></div>");
-            if (this.buttons.length > 0) {
+            if (this.buttons.length > 0)
+            {
                 parts.push("<div class='modal-footer'>" + this.createButtonMarkup() + "</div>")
             }
             parts.push("</div>");
             return parts.join("\n");
         }
 
-        private setupEvents(modal) {
+        private setupEvents(modal)
+        {
             var self:Simple.Box = this,
                 DOMBody = $('body'),
                 resizeModalOnWindowResize,
                 $window = $(window);
 
-            modal.bind('hidden', function () {
+            modal.bind('hidden', function ()
+            {
                 modal.remove();
-                if (self.settings.preventScrolling) {
+                if (self.settings.preventScrolling)
+                {
                     DOMBody.css('margin-top', '');
                     DOMBody.removeClass('simplebox-open');
                     $window.scrollTop(self.scrollPosition);
                 }
             });
 
-            $('.modal-footer a, a.close', modal).click(function (e) {
+            $('.modal-footer a, a.close', modal).click(function (e)
+            {
                 e.preventDefault();
                 self.hideSource = Simple.Box.HIDESOURCE_BUTTON;
                 var callback = self.callbackHolder.get($(this).data("handler"));
-                if (callback) {
-                    if (callback(e, modal) !== false) {
+                if (callback)
+                {
+                    if (callback(e, modal) !== false)
+                    {
                         modal.close();
                     }
                 }
-                else {
+                else
+                {
                     modal.close();
                 }
             });
 
-            if (this.settings.autoResize) {
+            if (this.settings.autoResize)
+            {
                 var resizeTimer;
-                resizeModalOnWindowResize = function () {
-                    if (resizeTimer) {
+                resizeModalOnWindowResize = function ()
+                {
+                    if (resizeTimer)
+                    {
                         clearTimeout(resizeTimer);
                     }
-                    resizeTimer = setTimeout(function () {
+                    resizeTimer = setTimeout(function ()
+                    {
                         self.resizeAndPosition(modal);
                     }, 100);
                 };
                 $window.bind('resize', resizeModalOnWindowResize);
             }
 
-            modal.bind('hide', function () {
+            modal.bind('hide', function ()
+            {
                 if (self.hideSource == Simple.Box.HIDESOURCE_ESCAPE &&
-                    typeof self.settings.onEscape == 'function') {
+                    typeof self.settings.onEscape == 'function')
+                {
                     self.settings.onEscape();
                 }
-                if (self.settings.preventScrolling) {
+                if (self.settings.preventScrolling)
+                {
 
                 }
-                if (self.settings.autoResize) {
+                if (self.settings.autoResize)
+                {
                     $window.unbind('resize', resizeModalOnWindowResize);
                 }
             });
 
-            $(document).bind('keyup.modal', function (e) {
-                if (e.which === Simple.Box.ESCAPE_KEY) {
+            $(document).bind('keyup.modal', function (e)
+            {
+                if (e.which === Simple.Box.ESCAPE_KEY)
+                {
                     self.hideSource = Simple.Box.HIDESOURCE_ESCAPE;
                 }
             });
 
-            modal.bind('shown', function () {
+            modal.bind('shown', function ()
+            {
                 $("a.btn:first", modal).focus();
             });
 
-            if (this.settings.preventScrolling) {
-                modal.bind('show', function () {
+            if (this.settings.preventScrolling)
+            {
+                modal.bind('show', function ()
+                {
                     self.scrollPosition = $(window).scrollTop();
                     DOMBody.css('margin-top', '-' + self.scrollPosition + 'px');
                     DOMBody.addClass('simplebox-open');
@@ -249,20 +299,24 @@ module Simple
             }
         }
 
-        public render() {
+        public render()
+        {
             var modal = $(this.createModalMarkup()),
                 DOMBody = $('body');
 
-            if (this.settings.animate) {
+            if (this.settings.animate)
+            {
                 modal.addClass("fade");
             }
-            if (this.settings.startHidden) {
+            if (this.settings.startHidden)
+            {
                 modal.addClass('hidden');
             }
 
             this.setupEvents(modal);
 
-            if (!this.settings.closeOnEscape && this.settings.onEscape) {
+            if (!this.settings.closeOnEscape && this.settings.onEscape)
+            {
                 this.settings.closeOnEscape = true;
             }
 
@@ -276,7 +330,8 @@ module Simple
                 "keyboard": this.settings.closeOnEscape
             });
 
-            if (backdropAlreadyExists) {
+            if (backdropAlreadyExists)
+            {
                 this.moveBackdropToModal(modal);
             }
 
@@ -287,17 +342,21 @@ module Simple
             return modal;
         }
 
-        private createHelperFunctions(modal) {
+        private createHelperFunctions(modal)
+        {
             var self:Simple.Box = this;
 
-            modal.close = function () {
-                this.bind('hidden', function () {
+            modal.close = function ()
+            {
+                this.bind('hidden', function ()
+                {
                     self.moveBackdropToPreviousModalOrRemove();
                 });
                 this.modal('hide');
             };
 
-            modal.modalResize = function (options) {
+            modal.modalResize = function (options)
+            {
                 options = options || {};
                 var settings = self.settings.size;
                 $.extend(settings, options);
@@ -307,27 +366,33 @@ module Simple
                 self.positionModalTo(modal, sizes);
             };
 
-            modal.modalShow = function (fade) {
+            modal.modalShow = function (fade)
+            {
                 this.hide();
                 this.removeClass('hidden');
-                if (fade) {
+                if (fade)
+                {
                     var speed = parseInt(fade, 10) || 300;
                     this.fadeIn(speed);
                 }
-                else {
+                else
+                {
                     this.show();
                 }
             };
 
-            modal.modalPopulate = function (data, resize) {
+            modal.modalPopulate = function (data, resize)
+            {
                 this.find('.modal-body').html(data);
-                if (resize) {
+                if (resize)
+                {
                     this.modalResize();
                 }
             };
         }
 
-        private calculateSizesForModal(modal, options) {
+        private calculateSizesForModal(modal, options)
+        {
             var $body:JQuery = modal.find('.modal-body'),
                 height:Number = 0,
                 viewHeight:Number = $(window).innerHeight(),
@@ -338,31 +403,39 @@ module Simple
                 headerAndFooterOffset = modalAreaSizes.header + modalAreaSizes.footer;
 
             var padding = parseInt($body.css('padding-top'), 10) + parseInt($body.css('padding-bottom'), 10);
-            if (options.content && options.content !== false) {
+            if (options.content && options.content !== false)
+            {
                 contentHeight = options.content === true ? modalAreaSizes.body + 10 : options.content;
                 height = contentHeight;
             }
 
-            if (options.max && options.max !== false) {
+            if (options.max && options.max !== false)
+            {
                 max = options.max === true ? parseInt(modal.css('max-height'), 10) : options.max;
-                if (max && (!contentHeight || contentHeight > max)) {
+                if (max && (!contentHeight || contentHeight > max))
+                {
                     height = max;
                 }
             }
-            else if (!contentHeight) {
+            else if (!contentHeight)
+            {
                 height = viewHeight - 30;
             }
 
-            if (height > viewHeight) {
+            if (height > viewHeight)
+            {
                 height = viewHeight - 30; // a bit offset
             }
 
-            if (options.min && options.min !== false) {
+            if (options.min && options.min !== false)
+            {
                 min = options.min === true ? parseInt(modal.css('min-height'), 10) : options.min;
-                if (height < min && min > viewHeight) {
+                if (height < min && min > viewHeight)
+                {
                     height = min - 30;
                 }
-                else if (height < min) {
+                else if (height < min)
+                {
                     height = min;
                 }
             }
@@ -372,11 +445,13 @@ module Simple
                 contentHeight: 0
             };
 
-            if (contentHeight && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || contentHeight <= max))) {
+            if (contentHeight && (height + (headerAndFooterOffset + padding) < viewHeight && (!max || contentHeight <= max)))
+            {
                 modalSize.totalHeight = height + (headerAndFooterOffset + padding);
                 modalSize.contentHeight = height;
             }
-            else {
+            else
+            {
                 modalSize.totalHeight = height;
                 modalSize.contentHeight = height - (headerAndFooterOffset + padding);
             }
@@ -384,7 +459,8 @@ module Simple
             return modalSize;
         }
 
-        private resizeModalTo($modal, sizes) {
+        private resizeModalTo($modal, sizes)
+        {
             var $body = $modal.find('.modal-body'),
                 bodyCss = {
                     'height': sizes.contentHeight
@@ -393,13 +469,16 @@ module Simple
                     'height': sizes.totalHeight
                 };
 
-            if (this.settings.animate) {
+            if (this.settings.animate)
+            {
                 $body.animate(bodyCss, 250);
-                $modal.animate(modalCss, 250, function () {
+                $modal.animate(modalCss, 250, function ()
+                {
                     $modal.trigger(Simple.Box.EVENT_RESIZE);
                 });
             }
-            else {
+            else
+            {
                 $body.css(bodyCss);
                 $modal.css(modalCss);
                 $modal.trigger(Simple.Box.EVENT_RESIZE);
@@ -407,21 +486,25 @@ module Simple
             }
         }
 
-        private positionModalTo(modal, sizes) {
+        private positionModalTo(modal, sizes)
+        {
             modal.css({'margin-top': -(sizes.totalHeight / 2)});
         }
 
-        private resizeAndPosition(modal) {
+        private resizeAndPosition(modal)
+        {
             var sizeSettings = this.settings.size;
             var sizes = this.calculateSizesForModal(modal, sizeSettings);
             this.positionModalTo(modal, sizes);
-            if (sizeSettings.min !== false || sizeSettings.max !== false) {
+            if (sizeSettings.min !== false || sizeSettings.max !== false)
+            {
                 this.resizeModalTo(modal, sizes);
             }
         }
 
 
-        private calculateModalPartHeights(modal:JQuery) {
+        private calculateModalPartHeights(modal:JQuery)
+        {
             var tmpModal = $('<div></div>');
             var content = modal.html();
             var header = 0,
@@ -440,10 +523,12 @@ module Simple
             body = tmpModal.find('.modal-body div:first').outerHeight();
             var $header = tmpModal.find('.modal-header'),
                 $footer = tmpModal.find('.modal-footer');
-            if ($header) {
+            if ($header)
+            {
                 header = $header.outerHeight();
             }
-            if ($footer) {
+            if ($footer)
+            {
                 footer = $footer.outerHeight();
             }
             tmpModal.remove();
@@ -454,12 +539,14 @@ module Simple
     class CallbackHolder {
         private callbacks:any = [];
 
-        public add(callback:()=>{}) {
+        public add(callback:()=>{})
+        {
             this.callbacks.push(callback);
             return this.callbacks.length - 1;
         }
 
-        public get(index:Number):()=>{} {
+        public get(index:Number):()=>{}
+        {
             return this.callbacks[index];
         }
     }
@@ -505,17 +592,22 @@ module Simple
         public callback:()=>{};
         public icon:String;
 
-        constructor(label:String, callbackOrCssClass?:any, callback?:()=>{}) {
+        constructor(label:String, callbackOrCssClass?:any, callback?:()=>{})
+        {
             this.label = label;
-            if (callbackOrCssClass) {
-                if (typeof callbackOrCssClass == 'string') {
+            if (callbackOrCssClass)
+            {
+                if (typeof callbackOrCssClass == 'string')
+                {
                     this.cssClass = callbackOrCssClass;
                 }
-                else if (typeof callbackOrCssClass == 'function') {
+                else if (typeof callbackOrCssClass == 'function')
+                {
                     this.callback = callbackOrCssClass;
                 }
             }
-            if (callback) {
+            if (callback)
+            {
                 this.callback = callback;
             }
         }
