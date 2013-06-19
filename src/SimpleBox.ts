@@ -12,15 +12,15 @@ module Simple
         public static HIDESOURCE_BUTTON = 'button';
         public static EVENT_RESIZE = 'simplebox.resize';
 
-        private callbackHolder = new CallbackHolder();
-        private hideSource:String;
-        private scrollPosition:Number;
-        private header:String;
-        private content:String;
+        private callbackHolder:CallbackHolder = new CallbackHolder();
+        private hideSource:string;
+        private scrollPosition:number;
+        private header:string;
+        private content:string;
         private buttons:Button[];
         private settings:Simple.Settings;
 
-        constructor(header?:String, content?:String, buttons?:Button[], settings?:Simple.Settings)
+        constructor(header?:string, content?:string, buttons?:Button[], settings?:Simple.Settings)
         {
             this.header = header || "";
             this.content = content || "";
@@ -28,19 +28,19 @@ module Simple
             this.settings = settings || new Simple.Settings();
         }
 
-        public setContent(content:String)
+        public setContent(content:string)
         {
             this.content = content;
             return this;
         }
 
-        public setHeader(header:String)
+        public setHeader(header:string)
         {
             this.header = header;
             return this;
         }
 
-        public setSetting(attribute:String, value:any)
+        public setSetting(attribute:string, value:any)
         {
             this.settings[attribute] = value;
             return this;
@@ -73,7 +73,7 @@ module Simple
             return this;
         }
 
-        public setButtons(buttons:SimpleBoxButton[])
+        public setButtons(buttons:Button[])
         {
             this.buttons = buttons;
             return this;
@@ -86,7 +86,7 @@ module Simple
 
             for (var i = 0; i < numberOfButtons; i++)
             {
-                var button:SimpleBoxButton = this.buttons[i],
+                var button:SimpleBoxButton = <SimpleBoxButton>this.buttons[i],
                     iconMarkup = "",
                     dataHandlerMarkup = "",
                     cssClass = "",
@@ -181,7 +181,7 @@ module Simple
 
         public static closeAll()
         {
-            $(".simplebox").modal("hide");
+            $(".simplebox") .modal("hide");
         }
 
         private createModalMarkup()
@@ -394,11 +394,11 @@ module Simple
         private calculateSizesForModal(modal, options)
         {
             var $body:JQuery = modal.find('.modal-body'),
-                height:Number = 0,
-                viewHeight:Number = $(window).innerHeight(),
-                max:Number,
-                min:Number,
-                contentHeight:Number,
+                height:number = 0,
+                viewHeight:number = $(window).innerHeight(),
+                max:number,
+                min:number,
+                contentHeight:number,
                 modalAreaSizes = this.calculateModalPartHeights(modal),
                 headerAndFooterOffset = modalAreaSizes.header + modalAreaSizes.footer;
 
@@ -440,7 +440,7 @@ module Simple
                 }
             }
 
-            var modalSize:Object = {
+            var modalSize:any = {
                 totalHeight: 0,
                 contentHeight: 0
             };
@@ -493,7 +493,8 @@ module Simple
 
         private resizeAndPosition(modal)
         {
-            var sizeSettings = this.settings.size;
+            // TODO: can be casted to SizeSettings interface if that is created.
+            var sizeSettings:any = this.settings.size;
             var sizes = this.calculateSizesForModal(modal, sizeSettings);
             this.positionModalTo(modal, sizes);
             if (sizeSettings.min !== false || sizeSettings.max !== false)
@@ -537,7 +538,7 @@ module Simple
     }
 
     class CallbackHolder {
-        private callbacks:any = [];
+        private callbacks:any[] = [];
 
         public add(callback:()=>{})
         {
@@ -545,7 +546,7 @@ module Simple
             return this.callbacks.length - 1;
         }
 
-        public get(index:Number):()=>{}
+        public get(index:number):(e:Event,modal:any)=>{}
         {
             return this.callbacks[index];
         }
@@ -553,10 +554,10 @@ module Simple
 
     export interface Button
     {
-        label:String;
-        cssClass:String;
+        label:string;
+        cssClass:string;
         callback:()=>{};
-        icon:String;
+        icon:string;
     }
 
     export class Settings {
@@ -568,10 +569,10 @@ module Simple
 
         public backdrop:any = 'static';
 
-        public cssClass:String = "";
+        public cssClass:string = "";
 
         public closeButton:Boolean = true;
-        public closeButtonMarkup:String = "";
+        public closeButtonMarkup:string = "";
 
         public icons:{} = {};
 
@@ -587,12 +588,12 @@ module Simple
     }
 
     class SimpleBoxButton implements Button {
-        public label:String = "";
-        public cssClass:String = "";
+        public label:string = "";
+        public cssClass:string = "";
         public callback:()=>{};
-        public icon:String;
+        public icon:string;
 
-        constructor(label:String, callbackOrCssClass?:any, callback?:()=>{})
+        constructor(label:string, callbackOrCssClass?:any, callback?:()=>{})
         {
             this.label = label;
             if (callbackOrCssClass)
