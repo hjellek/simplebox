@@ -3,7 +3,9 @@
  * Date: 6/14/13
  * Time: 4:02 PM
  */
+
 ///<reference path='definitions/jquery.d.ts' />
+///<reference path='definitions/bootstrap.d.ts' />
 module Simple
 {
     export class Box {
@@ -323,11 +325,11 @@ module Simple
             DOMBody.append(modal);
 
             var backdropAlreadyExists = this.backDropExists(),
-                backdrop = (this.settings.backdrop === 'static' || this.settings.backdrop) && !backdropAlreadyExists ? this.settings.backdrop : false;
+                renderBackdrop = (this.settings.backdrop === 'static' || this.settings.backdrop) && !backdropAlreadyExists ? true : false;
 
             modal.modal({
-                "backdrop": backdrop,
-                "keyboard": this.settings.closeOnEscape
+                backdrop: renderBackdrop,
+                keyboard: this.settings.closeOnEscape
             });
 
             if (backdropAlreadyExists)
@@ -561,10 +563,10 @@ module Simple
     }
 
     export class Settings {
-        public animate:Boolean = true;
-        public startHidden:Boolean = false;
+        public animate:boolean = true;
+        public startHidden:boolean = false;
 
-        public closeOnEscape:Boolean = false;
+        public closeOnEscape:boolean = false;
         public onEscape:any;
 
         public backdrop:any = 'static';
