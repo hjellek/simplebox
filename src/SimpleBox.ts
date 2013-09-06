@@ -581,7 +581,7 @@ module Simple
 
         public cssClass:string = "";
 
-        public closeButton:Boolean = true;
+        public closeButton:boolean = true;
         public closeButtonMarkup:string = "";
 
         public icons:{} = {};
@@ -592,9 +592,9 @@ module Simple
             content: true
         };
 
-        public autoResize:Boolean = false;
-        public preventScrolling:Boolean = true;
+        public autoResize:boolean = false;
         public centerHorizontal:boolean = false;
+        public preventScrolling:boolean = true;
     }
 
     class SimpleBoxButton implements Button {
