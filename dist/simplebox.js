@@ -350,7 +350,7 @@ var Simple;
         };
 
         Box.prototype.positionModalTo = function (modal, sizes) {
-            if (this.settings.autoPositionX) {
+            if (this.settings.centerHorizontal) {
                 modal.css({
                     'margin-left': 0,
                     'left': (document.body.clientWidth / 2) - (modal.width() / 2)

@@ -490,7 +490,7 @@ module Simple
 
         private positionModalTo(modal, sizes)
         {
-            if(this.settings.autoPositionX)
+            if(this.settings.centerHorizontal)
             {
                 modal.css({
                    'margin-left':0,
@@ -593,8 +593,8 @@ module Simple
         };
 
         public autoResize:Boolean = false;
-        public autoPositionX:Boolean = false;
         public preventScrolling:Boolean = true;
+        public centerHorizontal:boolean = false;
     }
 
     class SimpleBoxButton implements Button {
