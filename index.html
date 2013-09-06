@@ -201,6 +201,21 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="span12">
+            <h2>autoPosition X axis</h2>
+            <code>
+                var box = new Simple.Box()<br />
+                .setContent('Im centered horizontally!')<br />
+                .setSetting('closeOnEscape', true)<br />
+                .setSetting('autoPositionX', true)<br />
+                .render();
+            </code>
+            <br />
+            <button id="button-modal-4" class="btn btn-success">Center on the X Axis for your convenience!</button>
+        </div>
+    </div>
+
     <hr>
 
     <div class="footer">
@@ -211,7 +226,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-<script src="dist/simplebox.js"></script>
+<script src="src/SimpleBox.js"></script>
 <script>
     $(document).ready(function()
     {
@@ -275,6 +290,55 @@
         $('#button-modal-3').click(function(e)
         {
             var box = new Simple.Box("RLY SHRT", "Shorthand syntax", [{label:"Ok"}]).render();
+        });
+
+        $('#button-modal-4').click(function(e)
+        {
+            var box = new Simple.Box()
+                    .setContent('Im centered horizontally!')
+                    .setSetting('closeOnEscape', true)
+                    .setSetting('autoPositionX', true)
+                    .render();
+
+            var maxMin = 0;
+            function flexWidth()
+            {
+                if(maxMin == 0)
+                {
+                    box.animate({width:'310px'}, {
+                        duration:5000,
+                        complete: function()
+                        {
+                            maxMin = 1;
+                            box.stop(true);
+                            window.requestAnimationFrame(flexWidth);
+                        },
+                        step: function()
+                        {
+                            box.modalResize();
+                        }
+                    });
+                }
+                else
+                {
+                    box.animate({width:'620px'},{
+                        duration:5000,
+                        complete: function()
+                        {
+                            maxMin = 0;
+                            box.stop(true);
+                            window.requestAnimationFrame(flexWidth);
+                        },
+                        step: function()
+                        {
+                            box.modalResize();
+                        }
+                    });
+                }
+            }
+
+           flexWidth();
+
         });
     });
 </script>
