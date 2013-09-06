@@ -490,6 +490,14 @@ module Simple
 
         private positionModalTo(modal, sizes)
         {
+            if(this.settings.autoPositionX)
+            {
+                modal.css({
+                   'margin-left':0,
+                   'left':(document.body.clientWidth / 2) - (modal.width() / 2)
+                });
+            }
+
             modal.css({'margin-top': -(sizes.totalHeight / 2)});
         }
 
@@ -585,7 +593,7 @@ module Simple
         };
 
         public autoResize:Boolean = false;
-
+        public autoPositionX:Boolean = false;
         public preventScrolling:Boolean = true;
     }
 
