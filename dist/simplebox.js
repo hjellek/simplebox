@@ -433,7 +433,7 @@ var Simple;
                 content: true
             };
             this.autoResize = false;
-            this.autoPositionY = false;
+            this.centerHorizontal = false;
             this.preventScrolling = true;
         }
         return Settings;
